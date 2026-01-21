@@ -3,9 +3,6 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
-    app_name: str = "Task Manager API"
-    debug: bool = True
-
     # DATABASE
     DATABASE_URL: str
     TEST_DATABASE_URL: str | None = None
