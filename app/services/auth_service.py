@@ -37,7 +37,7 @@ class AuthService:
         result = await session.execute(query)
         user_in_db = result.scalars().first()
 
-        if user_in_db is None:
+        if not user_in_db:
             raise UserNotFoundException()
 
         if not bcrypt.checkpw(

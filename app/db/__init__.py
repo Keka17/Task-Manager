@@ -1,3 +1,3 @@
-from .models import Base, User, Task
+from .models import Base, User, Task, RevokedToken
 
-_all__ = ("Base", "User", "Task")
+_all__ = ("Base", "User", "Task", "RevokedToken")
