@@ -1,7 +1,6 @@
 import bcrypt
 import datetime
 import jwt
-from dns.e164 import query
 from jwt import PyJWTError
 from fastapi import APIRouter, Depends, Header
 
@@ -31,6 +30,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings
 
+from app.services.user_service import UserService
+from app.services.auth_service import AuthService
+
 router = APIRouter(prefix="/users", tags=["Users"])
 
 settings = get_settings()
@@ -40,35 +42,30 @@ ALGORITHM = settings.ALGORITHM
 
 
 @router.post("/signup", response_model=UserSchema)
-async def signup(user: UserCreate, db: AsyncSession = Depends(get_db_connection)):
-    """
-    User registration function with storage in the database.
-    """
-    query = select(UserModel).where(
-        or_(UserModel.email == user.email, UserModel.phone == user.phone)
-    )
-    result = await db.execute(query)
-    existing_user = result.scalar_one_or_none()
-
-    if existing_user:
-        if existing_user.email == user.email:
-            raise EmailAlreadyExistsException(email=user.email)
-        if existing_user.phone == user.phone:
-            raise PhoneAlreadyExistsException(phone=user.phone)
-
-    password_bytes = bytes(user.password, "utf-8")
-    hashed = bcrypt.hashpw(password_bytes, bcrypt.gensalt())
-
-    new_user = UserModel(
-        name=user.name,
-        hashed_password=hashed.decode("utf-8"),
-        position=user.position,
-        email=user.email,
-        phone=user.phone,
-    )
-
-    db.add(new_user)
-    await db.commit()
-    await db.refresh(new_user)
-
+async def signup(user: UserCreate, session: AsyncSession = Depends(get_db_connection)):
+    new_user = await UserService.signup(user, session)
     return new_user
+
+
+@router.post("/login")
+async def login(user_in: UserLogin, session: AsyncSession = Depends(get_db_connection)):
+    tokens = await AuthService.login(user_in, session)
+    return tokens
+
+
+@router.post("/refresh")
+async def refresh_token(
+    x_refresh_token: str = Header(...),
+    session: AsyncSession = Depends(get_db_connection),
+):
+    new_tokens = await AuthService.refresh(x_refresh_token, session)
+    return new_tokens
+
+
+@router.post("/logout")
+async def logout(
+    x_refresh_token: str = Header(...),
+    session: AsyncSession = Depends(get_db_connection),
+):
+    result = await AuthService.logout(x_refresh_token, session)
+    return result

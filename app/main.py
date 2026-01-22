@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
 
-from app.api.routers import users
+from app.api.endpoints import users
 from app.exceptions.base import AppException
 
 from app.handlers.exceptions import app_exception_handler

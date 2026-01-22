@@ -75,5 +75,5 @@ class User(UserBase):
 
 
 class UserLogin(BaseModel):
-    name: str
+    email: str
     password: str
