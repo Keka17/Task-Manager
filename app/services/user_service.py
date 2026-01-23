@@ -1,5 +1,5 @@
 import bcrypt
-from sqlalchemy import select, delete, or_
+from sqlalchemy import select, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models import User as UserModel
@@ -76,8 +76,7 @@ class UserService:
         if not user_in_db:
             raise UserNotFoundException()
 
-        query = delete(user_in_db)
-        await session.execute(query)
+        await session.delete(user_in_db)
         await session.commit()
 
-        return {"message": f"User with id {user_id} was successfully deleted."}
+        return {"message": f"Пользователь с id = {user_id} успешно удален."}

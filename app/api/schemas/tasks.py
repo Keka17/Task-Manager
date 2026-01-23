@@ -1,6 +1,7 @@
 from pydantic import BaseModel, ConfigDict, StringConstraints, field_validator
 from typing import Annotated
 from datetime import datetime
+from typing import Optional
 
 
 class TaskBase(BaseModel):
@@ -38,6 +39,14 @@ class TaskCreate(TaskBase):
                 "\n🟣 D - Не срочно и не важно"
             )
         return level
+
+
+class TaskUpdate(BaseModel):
+    content: Optional[str] = None
+
+
+class TaskUpdateAdmin(BaseModel):
+    remark: Optional[str] = None
 
 
 class Task(TaskBase):
