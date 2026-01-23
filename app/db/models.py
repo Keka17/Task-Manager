@@ -58,7 +58,7 @@ class Task(Base):
     )
 
     #  to establish a bidirectional relationship
-    user: Mapped["User"] = relationship("User", back_populates="tasks")
+    user: Mapped["User"] = relationship("User", back_populates="tasks", lazy="selectin")
 
     @property
     def user_email(self) -> str:
