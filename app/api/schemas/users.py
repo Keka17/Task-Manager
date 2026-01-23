@@ -1,4 +1,4 @@
-from pydantic import BaseModel, field_validator, EmailStr, ConfigDict
+from pydantic import BaseModel, field_validator, EmailStr, ConfigDict, ValidationInfo
 import re
 
 
@@ -13,7 +13,8 @@ class UserCreate(UserBase):
     password: str
 
     @field_validator("name")
-    def check_name(cls, name) -> str:
+    @classmethod
+    def check_name(cls, name: str) -> str:
         pattern = r"^[А-ЯЁ][а-яё]{1,30}(?:[- ][А-ЯЁ][а-яё]{1,30}){2}$"
 
         if re.fullmatch(pattern, name):
@@ -22,7 +23,8 @@ class UserCreate(UserBase):
             raise ValueError("Некорректная запись ФИО!")
 
     @field_validator("position")
-    def check_position(cls, position) -> str:
+    @classmethod
+    def check_position(cls, position: str) -> str:
         positions_list = [
             "CEO",
             "Продакт-мененджер",
@@ -40,8 +42,19 @@ class UserCreate(UserBase):
 
         return position
 
+    @field_validator("email")
+    @classmethod
+    def check_email(cls, email: str, info: ValidationInfo) -> EmailStr:
+        # Define allowed corporate domain
+        allowed_domain = "example.com"
+
+        if not email.lower().endswith(f"@{allowed_domain}"):
+            raise ValueError(f"Email должен содержать домен {allowed_domain}")
+        return email
+
     @field_validator("password")
-    def check_password(cls, password) -> str:
+    @classmethod
+    def check_password(cls, password: str) -> str:
         pattern = (
             r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{12,}$"
         )
@@ -56,7 +69,8 @@ class UserCreate(UserBase):
             )
 
     @field_validator("phone")
-    def check_phone(cls, phone) -> str:
+    @classmethod
+    def check_phone(cls, phone: str) -> str:
         pattern = r"^8\d{10}$"
         phone_ = phone.strip().replace(" ", "")
 

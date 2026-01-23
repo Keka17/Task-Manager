@@ -40,13 +40,16 @@ class Task(Base):
     remark: Mapped[str] = mapped_column(Text, nullable=True)  # Admin only
     importance_level: Mapped[str] = mapped_column(String(1), nullable=False)
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now(), default=datetime.now
+        DateTime(timezone=True), server_default=func.now(), nullable=False
     )
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=False,
     )
     completed_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=True, default=None
+        DateTime(timezone=True), nullable=True
     )
 
     # relationship: user
@@ -56,6 +59,10 @@ class Task(Base):
 
     #  to establish a bidirectional relationship
     user: Mapped["User"] = relationship("User", back_populates="tasks")
+
+    @property
+    def user_email(self) -> str:
+        return self.user.email
 
 
 class RevokedToken(Base):

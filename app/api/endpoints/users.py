@@ -48,7 +48,7 @@ async def get_user(
     Returns a user by their id.
     This endpoint is allowed to users with administrative privileges (by access token) only.
     """
-    return await UserService.get_user_by_id(session, user_id=user_id)
+    return await UserService.get_user_by_id(user_id, session)
 
 
 @router.delete("/{user_id}")
@@ -61,4 +61,4 @@ async def delete_user(
     Deletes a user by their ID.
     This endpoint is allowed to users with administrative privileges (by access token) only.
     """
-    return await UserService.delete_user_by_id(session, user_id=user_id)
+    return await UserService.delete_user_by_id(user_id, session)
