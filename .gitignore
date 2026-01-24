@@ -12,3 +12,5 @@ pytest_cache/
 
 alembic/__pycache__/
 *.pyc
+
+celerybeat-schedule.db
