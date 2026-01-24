@@ -33,7 +33,7 @@ async def get_users(
 ):
     """
     Extracts all users from the database.
-    This endpoint is allowed to users with administrative privileges (by access token) only.
+    Only available to users with administrative privileges only.
     """
     return await UserService.get_users(session)
 
@@ -46,7 +46,7 @@ async def get_user(
 ):
     """
     Returns a user by their id.
-    This endpoint is allowed to users with administrative privileges (by access token) only.
+    Only available to users with administrative privileges only.
     """
     return await UserService.get_user_by_id(user_id, session)
 
@@ -59,6 +59,6 @@ async def delete_user(
 ):
     """
     Deletes a user by their ID.
-    This endpoint is allowed to users with administrative privileges (by access token) only.
+    Only available to users with administrative privileges only.
     """
     return await UserService.delete_user_by_id(user_id, session)

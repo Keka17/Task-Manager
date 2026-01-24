@@ -17,6 +17,9 @@ ALGORITHM = settings.ALGORITHM
 
 @router.post("/login")
 async def login(user_in: UserLogin, session: AsyncSession = Depends(get_db_connection)):
+    """
+    Verifying credentials to get a JWT token.
+    """
     tokens = await AuthService.login(user_in, session)
     return tokens
 
@@ -26,6 +29,11 @@ async def refresh_token(
     x_refresh_token: str = Header(...),
     session: AsyncSession = Depends(get_db_connection),
 ):
+    """
+    Updates a pair of tokens.
+    Accepts the old Refresh Token in Headers, revokes it (add to the database)
+    and generates new Access and Refresh tokens.
+    """
     new_tokens = await AuthService.refresh(x_refresh_token, session)
     return new_tokens
 
@@ -35,5 +43,9 @@ async def logout(
     x_refresh_token: str = Header(...),
     session: AsyncSession = Depends(get_db_connection),
 ):
+    """
+    Ends the user session. Accepts Refresh Token in Headers,
+    retrieves the JTI from the current token and adds it to the database.
+    """
     result = await AuthService.logout(x_refresh_token, session)
     return result

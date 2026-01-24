@@ -23,15 +23,15 @@ class TaskService:
         return new_task
 
     @staticmethod
-    async def get_my_tasks(current_user: UserModel, session: AsyncSession):
-        query = select(TaskModel).where(TaskModel.user_id == current_user.id)
+    async def get_all_tasks(current_user: UserModel, session: AsyncSession):
+        query = select(TaskModel)
         result = await session.execute(query)
 
         return result.scalars().all()
 
     @staticmethod
-    async def get_all_tasks(session: AsyncSession):
-        query = select(TaskModel)
+    async def get_my_tasks(current_user: UserModel, session: AsyncSession):
+        query = select(TaskModel).where(TaskModel.user_id == current_user.id)
         result = await session.execute(query)
 
         return result.scalars().all()

@@ -40,7 +40,7 @@ async def get_current_user(
 
 async def admin_required(current_user: UserModel = Depends(get_current_user)):
     """
-    Checks if the authenticated user has the 'is_admin' flag set to True.
+    Checks if the authenticated user has the 'is_superuser' flag set to True.
     """
     if not current_user.is_superuser:
         raise AdminAccessRequired()

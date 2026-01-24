@@ -30,9 +30,6 @@ class AuthService:
 
     @staticmethod
     async def login(user_in, session: AsyncSession):
-        """
-        Verifying credentials to get a JWT token.
-        """
         query = select(UserModel).where(UserModel.email == user_in.email)
         result = await session.execute(query)
         user_in_db = result.scalars().first()
@@ -57,11 +54,6 @@ class AuthService:
 
     @staticmethod
     async def refresh(x_refresh_token, session: AsyncSession):
-        """
-        Updates a pair of tokens.
-        Accepts the old Refresh Token in Headers, revokes it (add to the database)
-        and generates new Access and Refresh tokens.
-        """
         try:
             payload = jwt.decode(x_refresh_token, SECRET_KEY, algorithms=[ALGORITHM])
         except PyJWTError:
@@ -91,6 +83,7 @@ class AuthService:
 
         session.add(revoked_entry)
 
+        # Generate a new pair of tokens
         email = payload.get("sub")
         new_access = create_access_token({"sub": email})
         new_refresh = create_refresh_token({"sub": email})
@@ -105,16 +98,13 @@ class AuthService:
 
     @staticmethod
     async def logout(x_refresh_token, session: AsyncSession):
-        """
-        Ends the user session. Accepts Refresh Token in Headers
-        Retrieves the JTI from the current token and adds it to the database.
-        """
         try:
             payload = jwt.decode(x_refresh_token, SECRET_KEY, algorithms=[ALGORITHM])
 
             jti = payload.get("jti")
             exp = payload.get("exp")
 
+            # Add the refresh token to the blacklist
             session.add(
                 RevokedToken(
                     jti=jti,
@@ -125,4 +115,4 @@ class AuthService:
         except:
             raise InvalidTokenException()
 
-        return {"message": "Logged out successfully"}
+        return {"message": "Выход из системы выполнен успешно."}

@@ -13,9 +13,6 @@ from app.exceptions.users import (
 class UserService:
     @staticmethod
     async def signup(user, session: AsyncSession):
-        """
-        User registration function with storage in the database.
-        """
         query = select(UserModel).where(
             or_(UserModel.email == user.email, UserModel.phone == user.phone)
         )
