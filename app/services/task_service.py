@@ -1,4 +1,5 @@
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
+
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
@@ -12,6 +13,10 @@ from app.exceptions.tasks import (
     TaskAlreadyCompletedException,
 )
 
+from app.core.config import get_settings
+
+settings = get_settings()
+
 
 class TaskService:
     @staticmethod
@@ -20,7 +25,29 @@ class TaskService:
         current_user: UserModel,
         session: AsyncSession,
     ) -> TaskModel:
-        new_task = TaskModel(**task_data.model_dump(), user_id=current_user.id)
+        from zoneinfo import ZoneInfo
+
+        LOCAL_TZ = ZoneInfo(settings.TZ_IANA)
+        now_local = datetime.now(LOCAL_TZ)
+
+        level = task_data.importance_level
+        deadline = None
+
+        if level == "A":
+            deadline = now_local.replace(hour=18, minute=0, second=0, microsecond=0)
+
+            if now_local > deadline:
+                deadline += timedelta(days=1)
+        elif level == "B":
+            deadline = now_local + timedelta(days=7)
+        elif level == "C":
+            deadline = now_local + timedelta(hours=24)
+        else:
+            deadline = now_local + timedelta(days=30)
+
+        new_task = TaskModel(
+            **task_data.model_dump(), user_id=current_user.id, deadline_date=deadline
+        )
 
         session.add(new_task)
         await session.commit()

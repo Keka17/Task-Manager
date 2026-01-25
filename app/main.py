@@ -1,3 +1,4 @@
+from fastapi.encoders import jsonable_encoder
 from loguru import logger
 import sys
 

@@ -24,6 +24,9 @@ class Settings(BaseSettings):
     # Redis
     REDIS_URL: str = "redis://localhost:6379/0"
 
+    # IANA timezone name
+    TZ_IANA: str = "Europe/Moscow"
+
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"

@@ -1,7 +1,17 @@
-from pydantic import BaseModel, ConfigDict, StringConstraints, field_validator
-from typing import Annotated
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    StringConstraints,
+    field_validator,
+    PlainSerializer,
+)
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Annotated
+from zoneinfo import ZoneInfo
+
+from app.core.config import get_settings
+
+settings = get_settings()
 
 
 class TaskBase(BaseModel):
@@ -49,12 +59,24 @@ class TaskUpdateAdmin(BaseModel):
     remark: Optional[str] = None
 
 
+# Custom datetime object output based on the time zone
+LOCAL_TZ = ZoneInfo(settings.TZ_IANA)
+
+DateTimeHuman = Annotated[
+    datetime,
+    PlainSerializer(
+        lambda dt: dt.astimezone(LOCAL_TZ).strftime("%Y-%m-%d %H:%M"), return_type=str
+    ),
+]
+
+
 class Task(TaskBase):
     id: int
     user_email: str
     remark: str | None = None
-    created_at: datetime
-    updated_at: datetime
-    completed_at: datetime | None = None
+    created_at: DateTimeHuman
+    deadline_date: DateTimeHuman | None = None
+    updated_at: DateTimeHuman
+    completed_at: DateTimeHuman | None = None
 
     model_config = ConfigDict(from_attributes=True)
