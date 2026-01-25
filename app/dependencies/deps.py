@@ -15,7 +15,7 @@ from app.db.database import get_db_connection
 async def get_current_user(
     payload: dict = Depends(decode_jwt_token),
     session: AsyncSession = Depends(get_db_connection),
-):
+) -> UserModel:
     """
     Retrieves the profile of the currently authenticated user by decoding JWT token.
     Only accessible with a valid Access Token in the Authorization header.
@@ -38,7 +38,9 @@ async def get_current_user(
     return user_in_db
 
 
-async def admin_required(current_user: UserModel = Depends(get_current_user)):
+async def admin_required(
+    current_user: UserModel = Depends(get_current_user),
+) -> UserModel:
     """
     Checks if the authenticated user has the 'is_superuser' flag set to True.
     """

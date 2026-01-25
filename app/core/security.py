@@ -46,7 +46,9 @@ def create_access_token(data: dict):
 
 def create_refresh_token(data: dict):
     """Creates refresh-type JWT token"""
-    return create_jwt_token(data, timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS), "refresh", include_jti=True)
+    return create_jwt_token(
+        data, timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS), "refresh", include_jti=True
+    )
 
 
 def decode_jwt_token(token: str = Depends(oauth2_scheme)) -> dict:

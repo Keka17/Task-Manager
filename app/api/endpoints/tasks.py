@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Depends
+from typing import Optional
+
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.database import get_db_connection
@@ -30,14 +32,17 @@ async def create_task(
 
 @router.get("/", response_model=list[TaskSchema])
 async def get_tasks(
+    level: Optional[str] = Query(default=None, min_length=1, max_length=1),
+    completed: Optional[bool] = Query(default=None),
     current_user: UserModel = Depends(get_current_user),
     session: AsyncSession = Depends(get_db_connection),
 ):
     """
     Retrieving a list of all tasks.
+    Query parameters: level (importance_level), completed (if completed_at is not Null).
     Only accessible with a valid Access Token in the Authorization header.
     """
-    return await TaskService.get_all_tasks(current_user, session)
+    return await TaskService.get_all_tasks(level, completed, current_user, session)
 
 
 @router.get("/my", response_model=list[TaskSchema])
@@ -52,19 +57,6 @@ async def get_user_tasks(
     return await TaskService.get_my_tasks(current_user, session)
 
 
-@router.get("/{level}", response_model=list[TaskSchema])
-async def get_tasks_by_level(
-    level: str,
-    session: AsyncSession = Depends(get_db_connection),
-    admin: UserModel = Depends(admin_required),
-):
-    """
-    Retrieving tasks of a specific level of importance.
-    Only available to users with administrative privileges only.
-    """
-    return await TaskService.levels_list(level, session)
-
-
 @router.patch("/{task_id}", response_model=TaskSchema)
 async def update_task(
     task_id: int,
@@ -77,6 +69,19 @@ async def update_task(
     Only available to its author.
     """
     return await TaskService.update_task(task_id, task_update, current_user, session)
+
+
+@router.patch("/complete/{task_id}", response_model=TaskSchema)
+async def complete_task(
+    task_id: int,
+    current_user: UserModel = Depends(get_current_user),
+    session: AsyncSession = Depends(get_db_connection),
+):
+    """
+    Adds a timestamp to the 'completed_at' field as a task
+    completion indicator. Only available to its author.
+    """
+    return await TaskService.complete_task(task_id, current_user, session)
 
 
 @router.patch("/remark/{task_id}", response_model=TaskSchema)

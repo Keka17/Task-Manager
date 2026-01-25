@@ -1,10 +1,16 @@
+from datetime import datetime, timezone
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
 from app.db.models import Task as TaskModel
 from app.db.models import User as UserModel
 from app.api.schemas.tasks import TaskCreate
-from app.exceptions.tasks import TaskNotFoundException, NotAuthorException
+from app.exceptions.tasks import (
+    TaskNotFoundException,
+    NotAuthorException,
+    InvalidImportanceLevelException,
+    TaskAlreadyCompletedException,
+)
 
 
 class TaskService:
@@ -23,10 +29,24 @@ class TaskService:
         return new_task
 
     @staticmethod
-    async def get_all_tasks(current_user: UserModel, session: AsyncSession):
+    async def get_all_tasks(
+        level: str, completed: bool, current_user: UserModel, session: AsyncSession
+    ):
         query = select(TaskModel)
-        result = await session.execute(query)
 
+        if level:
+            levels = ["A", "B", "C", "D"]
+            if level not in levels:
+                raise InvalidImportanceLevelException()
+
+            query = query.where(TaskModel.importance_level == level)
+
+        if completed is True:
+            query = query.where(TaskModel.completed_at.isnot(None))
+        elif completed is False:
+            query = query.where(TaskModel.completed_at.is_(None))
+
+        result = await session.execute(query)
         return result.scalars().all()
 
     @staticmethod
@@ -52,6 +72,31 @@ class TaskService:
 
         if task_update.content:
             task_in_db.content = task_update.content
+
+        await session.commit()
+        await session.refresh(task_in_db)
+
+        return task_in_db
+
+    @staticmethod
+    async def complete_task(
+        task_id: int, current_user: UserModel, session: AsyncSession
+    ):
+        query = select(TaskModel).where(TaskModel.id == task_id)
+        result = await session.execute(query)
+        task_in_db = result.scalars().first()
+
+        if not task_in_db:
+            raise TaskNotFoundException(task_id)
+
+        if task_in_db.user_email != current_user.email:
+            raise NotAuthorException()
+
+        if task_in_db.completed_at:
+            raise TaskAlreadyCompletedException()
+
+        completion_time = datetime.now(timezone.utc)
+        task_in_db.completed_at = completion_time
 
         await session.commit()
         await session.refresh(task_in_db)
@@ -93,10 +138,3 @@ class TaskService:
         await session.commit()
 
         return {"message": f"Задача с id = {task_id} успешно удалена."}
-
-    @staticmethod
-    async def levels_list(level: str, session: AsyncSession):
-        query = select(TaskModel).where(TaskModel.importance_level == level)
-        result = await session.execute(query)
-
-        return result.scalars().all()
