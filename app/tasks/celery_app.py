@@ -1,6 +1,10 @@
 from celery import Celery
 from celery.schedules import crontab
 from .revoked_token_task import cleanup_expired_tokens
+from .notification_email import (
+    send_uncompleted_task_notification,
+    send_delayed_task_notification,
+)
 from app.core.config import get_settings
 
 settings = get_settings()
@@ -23,7 +27,16 @@ celery_app.conf.beat_schedule = {
         "task": cleanup_expired_tokens.name,
         # "schedule": crontab(minute='*')  # Launch every minute (for testing)
         "schedule": crontab(hour=0, minute=0),  # Launch every midnight (UTC)
-    }
+    },
+    "send_uncompleted_notification": {
+        "task": send_uncompleted_task_notification.name,
+        # "schedule": crontab(minute='*/2')  # Launch every minute (for testing)
+        "schedule": crontab(hour="*"),  # Launch every hour,
+    },
+    "send_delayed_notification": {
+        "task": send_delayed_task_notification.name,
+        "schedule": crontab(hour="*/24"),
+    },
 }
 
 # Launch in two terminals

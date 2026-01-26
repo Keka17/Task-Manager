@@ -42,15 +42,15 @@ class UserCreate(UserBase):
 
         return position
 
-    @field_validator("email")
-    @classmethod
-    def check_email(cls, email: str, info: ValidationInfo) -> EmailStr:
-        # Define allowed corporate domain
-        allowed_domain = "example.com"
-
-        if not email.lower().endswith(f"@{allowed_domain}"):
-            raise ValueError(f"Email должен содержать домен {allowed_domain}")
-        return email
+    # @field_validator("email")
+    # @classmethod
+    # def check_email(cls, email: str, info: ValidationInfo) -> EmailStr:
+    #     # Define allowed corporate domain
+    #     allowed_domain = "example.com"
+    #
+    #     if not email.lower().endswith(f"@{allowed_domain}"):
+    #         raise ValueError(f"Email должен содержать домен {allowed_domain}")
+    #     return email
 
     @field_validator("password")
     @classmethod

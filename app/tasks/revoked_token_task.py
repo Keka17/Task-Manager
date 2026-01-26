@@ -7,7 +7,7 @@ from app.db.database import AsyncSessionLocal
 from app.db.models import RevokedToken
 
 
-async def delete_tokens():
+async def sql_request():
     """
     Asynchronous function to perform sql-delete operation.
     """
@@ -31,4 +31,4 @@ def cleanup_expired_tokens():
     Triggered daily by Celery Beat.
     """
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(delete_tokens())
+    loop.run_until_complete(sql_request())

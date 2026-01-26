@@ -17,9 +17,12 @@ class Settings(BaseSettings):
     MAIL_USERNAME: str
     MAIL_PASSWORD: str
     MAIL_FROM: str
-    MAIL_PORT: int = 587
-    MAIL_SERVER: str = "smtp.gmail.com"
+    MAIL_PORT: int = 465
+    MAIL_SERVER: str = "smtp.mail.ru"
     MAIL_FROM_NAME: str = "TaskManager API"
+
+    # Admin mail
+    ADMIN_EMAIL: str = "admin@example.com"
 
     # Redis
     REDIS_URL: str = "redis://localhost:6379/0"
