@@ -45,6 +45,19 @@ async def get_tasks(
     return await TaskService.get_all_tasks(level, completed, current_user, session)
 
 
+@router.get("/{task_id}", response_model=TaskSchema)
+async def get_task(
+    task_id: int,
+    current_user: UserModel = Depends(get_current_user),
+    session: AsyncSession = Depends(get_db_connection),
+):
+    """
+    Retrieving a specific task by its id.
+    Only accessible with a valid Access Token in the Authorization header.
+    """
+    return await TaskService.get_task_by_id(task_id, current_user, session)
+
+
 @router.get("/my", response_model=list[TaskSchema])
 async def get_user_tasks(
     current_user: UserModel = Depends(get_current_user),

@@ -1,4 +1,5 @@
 from datetime import datetime, timezone, timedelta
+from zoneinfo import ZoneInfo
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
@@ -16,6 +17,7 @@ from app.exceptions.tasks import (
 from app.core.config import get_settings
 
 settings = get_settings()
+LOCAL_TZ = ZoneInfo(settings.TZ_IANA)
 
 
 class TaskService:
@@ -25,9 +27,6 @@ class TaskService:
         current_user: UserModel,
         session: AsyncSession,
     ) -> TaskModel:
-        from zoneinfo import ZoneInfo
-
-        LOCAL_TZ = ZoneInfo(settings.TZ_IANA)
         now_local = datetime.now(LOCAL_TZ)
 
         level = task_data.importance_level
@@ -75,6 +74,19 @@ class TaskService:
 
         result = await session.execute(query)
         return result.scalars().all()
+
+    @staticmethod
+    async def get_task_by_id(
+        task_id: int, current_user: UserModel, session: AsyncSession
+    ):
+        query = select(TaskModel).where(TaskModel.id == task_id)
+        result = await session.execute(query)
+        task_in_db = result.scalars().first()
+
+        if not task_in_db:
+            raise TaskNotFoundException(task_id)
+
+        return task_in_db
 
     @staticmethod
     async def get_my_tasks(current_user: UserModel, session: AsyncSession):
