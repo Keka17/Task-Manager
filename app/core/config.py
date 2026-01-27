@@ -30,6 +30,9 @@ class Settings(BaseSettings):
     # IANA timezone name
     TZ_IANA: str = "Europe/Moscow"
 
+    # Last work hour
+    LAST_HOUR: int = 18
+
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"

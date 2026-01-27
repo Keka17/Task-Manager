@@ -14,10 +14,16 @@ from app.exceptions.tasks import (
     TaskAlreadyCompletedException,
 )
 
+from app.utils.send_email import send_async_email
+
 from app.core.config import get_settings
+from pathlib import Path
+
+TEMPLATE_FOLDER = Path(__file__).parent.parent / "templates"
 
 settings = get_settings()
 LOCAL_TZ = ZoneInfo(settings.TZ_IANA)
+LAST_WORK_HOUR = settings.LAST_HOUR
 
 
 class TaskService:
@@ -33,7 +39,9 @@ class TaskService:
         deadline = None
 
         if level == "A":
-            deadline = now_local.replace(hour=18, minute=0, second=0, microsecond=0)
+            deadline = now_local.replace(
+                hour=LAST_WORK_HOUR, minute=0, second=0, microsecond=0
+            )
 
             if now_local > deadline:
                 deadline += timedelta(days=1)
@@ -51,6 +59,8 @@ class TaskService:
         session.add(new_task)
         await session.commit()
         await session.refresh(new_task)
+
+        await send_async_email(new_task, "task_notification.html")
 
         return new_task
 

@@ -35,7 +35,7 @@ class Task(Base):
     __tablename__ = "tasks"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    title: Mapped[str] = mapped_column(String(50), nullable=False)
+    title: Mapped[str] = mapped_column(String(150), nullable=False)
     content: Mapped[str] = mapped_column(Text, nullable=False)
     remark: Mapped[str] = mapped_column(Text, nullable=True)  # Admin only
     importance_level: Mapped[str] = mapped_column(String(1), nullable=False)
@@ -54,7 +54,9 @@ class Task(Base):
     completed_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
-
+    overdue_notified: Mapped[bool] = mapped_column(
+        Boolean, default=False, nullable=True
+    )
     # relationship: user
     user_id: Mapped[int] = mapped_column(
         ForeignKey("users.id", ondelete="CASCADE"), nullable=False
