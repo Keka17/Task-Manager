@@ -3,6 +3,7 @@ from zoneinfo import ZoneInfo
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 
 from app.db.models import Task as TaskModel
 from app.db.models import User as UserModel
@@ -48,7 +49,7 @@ class TaskService:
         elif level == "B":
             deadline = now_local + timedelta(days=7)
         elif level == "C":
-            deadline = now_local + timedelta(hours=24)
+            deadline = now_local + timedelta(hours=48)
         else:
             deadline = now_local + timedelta(days=30)
 
@@ -60,7 +61,8 @@ class TaskService:
         await session.commit()
         await session.refresh(new_task)
 
-        await send_async_email(new_task, "task_notification.html")
+        if new_task.importance_level == "A":
+            await send_async_email(new_task, "task_notification.html")
 
         return new_task
 
@@ -86,6 +88,18 @@ class TaskService:
         return result.scalars().all()
 
     @staticmethod
+    async def get_all_tasks_for_board(session: AsyncSession):
+        query = (
+            select(TaskModel)
+            .where(TaskModel.completed_at.is_(None))
+            .options(selectinload(TaskModel.user))
+            .order_by(TaskModel.created_at.desc())
+        )
+        result = await session.execute(query)
+
+        return result.scalars().all()
+
+    @staticmethod
     async def get_task_by_id(
         task_id: int, current_user: UserModel, session: AsyncSession
     ):
@@ -97,6 +111,12 @@ class TaskService:
             raise TaskNotFoundException(task_id)
 
         return task_in_db
+
+    @staticmethod
+    async def get_task_by_id_board(task_id: int, session: AsyncSession):
+        query = select(TaskModel).where(TaskModel.id == task_id)
+        result = await session.execute(query)
+        return result.scalars().first()
 
     @staticmethod
     async def get_my_tasks(current_user: UserModel, session: AsyncSession):

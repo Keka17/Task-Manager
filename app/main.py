@@ -1,11 +1,12 @@
-from fastapi.encoders import jsonable_encoder
 from loguru import logger
 import sys
 
 from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
+from fastapi.staticfiles import StaticFiles
 
 from app.api.endpoints import users, auth, tasks
+from app.api import websocket_board
 from app.exceptions.base import AppException
 
 from app.middlewares.logs import loguru_middleware
@@ -58,6 +59,9 @@ app.add_exception_handler(RequestValidationError, validation_exception_handler)
 app.include_router(users.router)
 app.include_router(auth.router)
 app.include_router(tasks.router)
+app.include_router(websocket_board.router)
+
+app.mount("/static", StaticFiles(directory="app/styles"), name="static")
 
 
 @app.get("/")

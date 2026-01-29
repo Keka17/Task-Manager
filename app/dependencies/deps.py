@@ -1,4 +1,5 @@
 from fastapi.params import Depends
+from fastapi import WebSocket, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
@@ -12,13 +13,9 @@ from app.db.models import User as UserModel
 from app.db.database import get_db_connection
 
 
-async def get_current_user(
-    payload: dict = Depends(decode_jwt_token),
-    session: AsyncSession = Depends(get_db_connection),
-) -> UserModel:
+async def get_user_from_payload(payload: dict, session: AsyncSession) -> UserModel:
     """
-    Retrieves the profile of the currently authenticated user by decoding JWT token.
-    Only accessible with a valid Access Token in the Authorization header.
+    Retrieves the profile of the user by decoding JWT token.
     """
     if payload.get("token_type") != "access":
         raise InvalidTokenTypeException(expected_type="access")
@@ -38,6 +35,17 @@ async def get_current_user(
     return user_in_db
 
 
+async def get_current_user(
+    payload: dict = Depends(decode_jwt_token),
+    session: AsyncSession = Depends(get_db_connection),
+) -> UserModel:
+    """
+    Retrieves the profile of the currently authenticated user by decoding JWT token.
+    For API endpoints.
+    """
+    return await get_user_from_payload(payload, session)
+
+
 async def admin_required(
     current_user: UserModel = Depends(get_current_user),
 ) -> UserModel:
@@ -48,3 +56,27 @@ async def admin_required(
         raise AdminAccessRequired()
 
     return current_user
+
+
+async def get_current_user_ws(websocket: WebSocket) -> UserModel:
+    """
+    Retrieves the profile of the currently authenticated user by decoding JWT token.
+    For WebSocket (as a query parameter).
+    """
+    token = websocket.query_params.get("token")
+
+    if not token:
+        await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
+
+    try:
+        payload = decode_jwt_token(token)
+    except:
+        await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
+
+    async with get_db_connection() as session:
+        try:
+            user = await get_user_from_payload(payload, session)
+        except Exception:
+            await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
+
+    return user

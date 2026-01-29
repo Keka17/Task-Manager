@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <title>Мененджер задач — Матрица Эйзенхауэра</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='board.css') }}">
+</head>
+
+<body>
+    <div class="header-container">
+        <h1 class="page-title">To-Do Стенд</h1>
+        <button class="logout-btn" onclick="logout()">Выйти</button>
+    </div>
+    <div class="matrix">
+
+        <!-- Q1 -->
+        <section class="quadrant q1">
+            <header class="quadrant-header">
+                A. Важно / Срочно<br />
+                <span>Наивысший приоритет</span>
+            </header>
+            <ul class="task-list" id="q1"></ul>
+        </section>
+
+        <!-- Q2 -->
+        <section class="quadrant q2">
+            <header class="quadrant-header">
+                B. Важно / Не срочно<br />
+                <span>Высокий приоритет</span>
+            </header>
+           <ul class="task-list" id="q2"></ul>
+        </section>
+
+        <!-- Q3 -->
+        <section class="quadrant q3">
+                 <header class="quadrant-header">
+                C. Важно / Не срочно<br />
+                <span>Умеренный приоритет</span>
+            </header>
+            <ul class="task-list" id="q3"></ul>
+        </section>
+
+        <!-- Q4 -->
+        <section class="quadrant q4">
+            <header class="quadrant-header">
+                D. Не срочно / Не важно<br />
+                <span>Низкий приоритет</span>
+            </header>
+            <ul class="task-list" id="q4"></ul>
+        </section>
+    </div>
+
+    <div id="modalOverlay" class="modal-overlay" onclick="closeModal()"></div>
+
+<div id="modal" class="modal">
+    <div class="modal-header">
+        <h2 id="modal-title" class="modal-title">Task Details</h2>
+        <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+
+    <div class="modal-body">
+        <div class="modal-section">
+            <div class="modal-label">Description</div>
+            <p id="modal-content" class="modal-content"></p>
+        </div>
+
+        <div id="remark-section" class="modal-section" style="display: none;">
+            <div class="modal-label">Remark</div>
+            <p id="modal-remark" class="modal-remark"></p>
+        </div>
+    </div>
+
+    <div class="modal-footer">
+        <div class="task-meta">
+            <div class="task-author">
+                <span class="icon">👤</span>
+                <span id="modal-author"></span>
+            </div>
+            <div class="task-date">
+                <span class="icon">🗓️</span>
+                <span id="modal-date"></span>
+                <span class="icon">⏰</span>
+                <span id="modal-deadline"></span>
+            </div>
+        </div>
+        <div id="modal-importance" class="importance-badge"></div>
+    </div>
+</div>
+
+     <script>
+    // Получаем токен
+    const token = localStorage.getItem('access_token');
+
+    if (!token) {
+        // Если нет токена, перенаправляем на страницу входа
+        alert('Please login first');
+        window.location.href = '/auth/login-page';
+        throw new Error('No token found');
+    }
+
+    console.log('Token found, initializing board...');
+
+    /* ---------- WebSocket ---------- */
+    let socket;
+    try {
+        socket = new WebSocket(`ws://${location.host}/ws/board?token=${token}`);
+
+        socket.onopen = () => {
+            console.log('WebSocket connected');
+        };
+
+        socket.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            console.log('WebSocket event:', data);
+
+            // Если кто-то присоединился/вышел или задача обновилась
+            if (data.event === 'user_joined' || data.event === 'user_left' || data.event === 'task_updated') {
+                // Можно обновить список задач или показать уведомление
+                console.log(`${data.email} ${data.event === 'user_joined' ? 'joined' : 'left'}`);
+            }
+        };
+
+        socket.onerror = (error) => {
+            console.error('WebSocket error:', error);
+            if (error.message.includes('401') || error.message.includes('403')) {
+                alert('Authentication failed. Please login again.');
+                logout();
+            }
+        };
+
+        socket.onclose = () => {
+            console.log('WebSocket disconnected');
+        };
+    } catch (error) {
+        console.error('Failed to create WebSocket:', error);
+    }
+
+    /* ---------- Загрузка задач ---------- */
+    async function loadTasks() {
+    try {
+        const res = await fetch("/tasks/board", {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Accept': 'application/json'
+            }
+        });
+
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+
+        const tasks = await res.json();
+        console.log(`Loaded ${tasks.length} tasks`);
+
+        const map = { A: "q1", B: "q2", C: "q3", D: "q4" };
+
+        // Очищаем колонки перед добавлением
+        Object.values(map).forEach(id => {
+            const ul = document.getElementById(id);
+            if (ul) ul.innerHTML = '';
+        });
+
+        // Добавляем задачи
+        tasks.forEach(t => {
+            const ul = document.getElementById(map[t.importance_level]);
+            if (!ul) return;
+
+            // СОЗДАЕМ ЭЛЕМЕНТ С КЛАССОМ task-item
+            const li = document.createElement("li");
+            li.className = "task-item";
+            li.onclick = (event) => openTask(t.id, event); // Передаем event
+
+            li.innerHTML = `
+                <div class="task-title">${t.title || 'No title'}</div>
+                <div class="task-meta-small">
+                    <span>👤 ${t.user?.name || t.name || 'Unknown'}</span>
+                    <span>🗓️ ${formatDate(t.created_at)}</span>
+                </div>
+            `;
+
+            ul.appendChild(li);
+        });
+
+    } catch (error) {
+        console.error("Error loading tasks:", error);
+    }
+}
+
+    /* ---------- Открытие задачи ---------- */
+    async function openTask(id) {
+        try {
+            const res = await fetch(`/tasks/board/${id}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json'
+                }
+            });
+
+            if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+
+            const task = await res.json();
+            console.log('Task details:', task);
+
+            // Заполняем модальное окно
+        document.getElementById("modal-title").textContent = task.title;
+        document.getElementById("modal-content").textContent = task.content;
+        document.getElementById("modal-author").textContent = task.user?.name || task.name || 'Unknown';
+        document.getElementById("modal-date").textContent = formatDate(task.created_at);
+        document.getElementById("modal-deadline").textContent = formatDate(task.deadline_date);
+
+               // Обработка ремарки
+            const remarkSection = document.getElementById("remark-section");
+            if (task.remark && task.remark.trim() !== '') {
+                document.getElementById("modal-remark").textContent = task.remark;
+                remarkSection.style.display = 'block';
+            } else {
+                remarkSection.style.display = 'none';
+            }
+
+            // Отображаем важность
+        const importanceBadge = document.getElementById("modal-importance");
+        const importanceMap = {
+            'A': { text: 'Наивысший приоритет', color:'#e0564a' },
+            'B': { text: 'Высокий приоритет', color: '#7ddc8a' },
+            'C': { text: 'Умеренный приоритет', color: '#f3e26d' },
+            'D': { text: 'Низкий приоритет', color: '#19b5f1' }
+        };
+
+        const importance = importanceMap[task.importance_level] || { text: 'Unknown', color: '#6c757d' };
+        importanceBadge.textContent = importance.text;
+        importanceBadge.style.background = importance.color;
+        importanceBadge.style.color = task.importance_level === 'C' ? '#4a3f00' : '#fff';
+        importanceBadge.style.padding = '4px 12px';
+        importanceBadge.style.borderRadius = '12px';
+        importanceBadge.style.fontSize = '12px';
+        importanceBadge.style.fontWeight = '600';
+
+        // Показываем модальное окно
+        document.getElementById("modal").style.display = "block";
+        document.getElementById("modalOverlay").style.display = "block";
+        document.body.style.overflow = "hidden"; // Блокируем скролл
+
+    } catch (error) {
+        console.error("Error loading task details:", error);
+        alert("Failed to load task details");
+    }
+}
+
+/* ---------- Закрытие модального окна ---------- */
+function closeModal() {
+    document.getElementById("modal").style.display = "none";
+    document.getElementById("modalOverlay").style.display = "none";
+    document.body.style.overflow = "auto"; // Возвращаем скролл
+}
+
+    /* ---------- Вспомогательные функции ---------- */
+    function formatDate(dateString) {
+        const date = new Date(dateString);
+        return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    }
+
+    function logout() {
+        // Удаляем токен и перенаправляем
+        localStorage.removeItem('access_token');
+        window.location.href = '/auth/login-page';
+    }
+
+    // Закрытие модального окна при клике вне его/Escape button
+    document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' &&
+        document.getElementById("modal").style.display === "block") {
+        closeModal();
+    }
+});
+
+    // Загружаем задачи при загрузке страницы
+    document.addEventListener('DOMContentLoaded', loadTasks);
+    </script>
+</body>
+</html>

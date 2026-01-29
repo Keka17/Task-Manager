@@ -31,7 +31,7 @@ class Settings(BaseSettings):
     TZ_IANA: str = "Europe/Moscow"
 
     # Last work hour
-    LAST_HOUR: int = 18
+    LAST_HOUR: int = 19
 
     class Config:
         env_file = ".env"

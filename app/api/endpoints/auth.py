@@ -1,5 +1,7 @@
-from fastapi import APIRouter, Depends, Header
+from fastapi import APIRouter, Depends, Header, Request
+from fastapi.templating import Jinja2Templates
 from sqlalchemy.ext.asyncio import AsyncSession
+from starlette.responses import HTMLResponse
 
 from app.db.database import get_db_connection
 from app.api.schemas.users import UserLogin
@@ -13,6 +15,7 @@ settings = get_settings()
 
 SECRET_KEY = settings.SECRET_KEY
 ALGORITHM = settings.ALGORITHM
+templates = Jinja2Templates(directory="app/templates")
 
 
 @router.post("/login")
@@ -22,6 +25,14 @@ async def login(user_in: UserLogin, session: AsyncSession = Depends(get_db_conne
     """
     tokens = await AuthService.login(user_in, session)
     return tokens
+
+
+@router.get("/login-page", response_class=HTMLResponse)
+async def login_page(request: Request):
+    """
+    Displays the HTML login page for the board.
+    """
+    return templates.TemplateResponse("login.html", {"request": request})
 
 
 @router.post("/refresh")

@@ -45,6 +45,26 @@ async def get_tasks(
     return await TaskService.get_all_tasks(level, completed, current_user, session)
 
 
+@router.get("/board")
+async def get_tasks_for_board(session: AsyncSession = Depends(get_db_connection)):
+    """
+    Retrieving a list of all uncompleted tasks for the board.
+    Used by tge frontend after login.
+    """
+    return await TaskService.get_all_tasks_for_board(session)
+
+
+@router.get("/board/{task_id}")
+async def get_task_details(
+    task_id: int, session: AsyncSession = Depends(get_db_connection)
+):
+    """
+    Retrieving a specific task by its id for the board.
+    Used by tge frontend after login.
+    """
+    return await TaskService.get_task_by_id_board(task_id, session)
+
+
 @router.get("/{task_id}", response_model=TaskSchema)
 async def get_task(
     task_id: int,
