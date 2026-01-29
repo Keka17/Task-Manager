@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8" />
     <title>Мененджер задач — Матрица Эйзенхауэра</title>
-    <link rel="stylesheet" href="{{ url_for('static', path='board.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='styles/board.css') }}">
+    <link rel="icon" href="{{ url_for('static', path='pictures/favicon.png') }}" type="image/png">
 </head>
 
 <body>
@@ -75,6 +76,7 @@
             <div class="task-author">
                 <span class="icon">👤</span>
                 <span id="modal-author"></span>
+                <span id="modal-position" style="font-size: 0.8rem;"></span>
             </div>
             <div class="task-date">
                 <span class="icon">🗓️</span>
@@ -103,7 +105,7 @@
     /* ---------- WebSocket ---------- */
     let socket;
     try {
-        socket = new WebSocket(`ws://${location.host}/ws/board?token=${token}`);
+        socket = new WebSocket(`ws://${location.host}/ws?token=${token}`);
 
         socket.onopen = () => {
             console.log('WebSocket connected');
@@ -204,6 +206,7 @@
         document.getElementById("modal-title").textContent = task.title;
         document.getElementById("modal-content").textContent = task.content;
         document.getElementById("modal-author").textContent = task.user?.name || task.name || 'Unknown';
+        document.getElementById("modal-position").textContent = task.user?.position || task.position || 'Unknown';
         document.getElementById("modal-date").textContent = formatDate(task.created_at);
         document.getElementById("modal-deadline").textContent = formatDate(task.deadline_date);
 

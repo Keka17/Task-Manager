@@ -6,7 +6,7 @@ from starlette.responses import HTMLResponse
 from app.dependencies.deps import get_current_user_ws
 from fastapi.templating import Jinja2Templates
 
-router = APIRouter(prefix="/ws/board")
+router = APIRouter(prefix="/ws")
 templates = Jinja2Templates(directory="app/templates")
 
 

@@ -112,7 +112,7 @@
                                                     <tbody>
                                                         <tr>
                                                             <td style="width:50px;">
-                                                                <img alt="image description" height="auto" src="https://cdn-icons-png.flaticon.com/256/9149/9149092.png" style="border:0;display:block;outline:none;text-decoration:none;height:auto;width:100%;font-size:14px;" width="50" />
+                                                                <img alt="image description" height="auto" src="https://i.pinimg.com/736x/80/37/b4/8037b419b8b1272e24712ff18162b2fa.jpg" style="border:0;display:block;outline:none;text-decoration:none;height:auto;width:100%;font-size:14px;" width="50" />
                                                             </td>
                                                         </tr>
                                                     </tbody>
@@ -122,7 +122,7 @@
                                         <tr>
                                             <td align="left" style="font-size:0px;padding:10px 25px;word-break:break-word;">
                                                 <div style="font-family:Helvetica, Arial, sans-serif;font-size:18px;font-weight:400;line-height:24px;text-align:left;color:#434245;">
-                                                    <h1 style="margin: 0; font-size: 24px; line-height: normal; font-weight: bold;"> Срок выполнения задачи истек<br /></h1>
+                                                    <h1 style="margin: 0; font-size: 24px; line-height: normal; font-weight: bold;">В работе: задача с замечаниями администратора<br /></h1>
                                                 </div>
                                             </td>
                                         </tr>
@@ -179,8 +179,9 @@
                                         <tr>
                                             <td align="left" style="font-size:0px;padding:10px 25px;word-break:break-word;">
                                                 <div style="font-family:Helvetica, Arial, sans-serif;font-size:18px;font-weight:400;line-height:24px;text-align:left;color:#434245;">
-                                                    <p style="margin: 0;">Это уведомление от системы контроля задач. Срок выполнения вашей задачи наивысшего приоритета <b>истек</b>.</p>
-                                                    <p><b>Срочно</b> завершите задачу или свяжитесь с <a href="mailto:{{ admin_email }}">администратором</a> для изменения срока, если работа еще продолжается. При возникновении трудностей <b>немедленно</b> сообщите о них руководству для оперативного решения вопроса.</p>
+                                                    <p style="margin: 0;">Это автоматическое уведомление от системы контроля задач.</p>
+                                                    <p>Администратор <b>внес ремарку</b> к вашей задаче:</p>
+                                                    <p>{{ remark }}</p>
                                                 </div>
                                             </td>
                                         </tr>
@@ -230,7 +231,7 @@
                                         <tr>
                                             <td align="left" style="font-size:0px;padding:10px 25px;word-break:break-word;">
                                                 <div style="font-family:Helvetica, Arial, sans-serif;font-size:18px;font-weight:bold;line-height:24px;text-align:left;color:#7A0B1F;">
-                                                    <p class="date" style="margin: 0; margin-bottom: 5px; font-size: 16px;">Установленный дедлайн: <u>{{ deadline }}</u></p>
+                                                    <p class="date" style="margin: 0; margin-bottom: 5px; font-size: 16px;">Завершить до: <u>{{ deadline }}</u></p>
                                                     <h2 style="margin: 0; font-size: 24px; font-weight: bold; line-height: 24px;">{{ title }}</h2>
                                                 </div>
                                             </td>

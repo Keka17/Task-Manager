@@ -18,7 +18,6 @@ Redis is used as:
 - a backendfor storing results, which keeps track of task execution status.
 """
 LOCAL_TZ = ZoneInfo(settings.TZ_IANA)
-LAST_WORK_HOUR = settings.LAST_HOUR
 
 celery_app = Celery("worker", broker=settings.REDIS_URL, backend=settings.REDIS_URL)
 
@@ -36,7 +35,7 @@ celery_app.conf.beat_schedule = {
     },
     "send_delayed_notification": {
         "task": send_delayed_task_notification.name,
-        "schedule": crontab(hour=LAST_WORK_HOUR, minute=0),
+        "schedule": crontab(minute="*/30"),
     },
 }
 

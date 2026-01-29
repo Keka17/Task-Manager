@@ -13,6 +13,7 @@ from app.api.schemas.tasks import (
 )
 from app.services.task_service import TaskService
 from app.dependencies.deps import admin_required, get_current_user
+from app.api.websocket_board import manager
 
 router = APIRouter(prefix="/tasks", tags=["Tasks"])
 
@@ -27,7 +28,9 @@ async def create_task(
     Creating a task with storage in the database.
     Only accessible with a valid Access Token in the Authorization header.
     """
-    return await TaskService.create_task(task_in, current_user, session)
+    task = await TaskService.create_task(task_in, current_user, session)
+    await manager.broadcast({"event": "task_created", "task": task})
+    return task
 
 
 @router.get("/", response_model=list[TaskSchema])

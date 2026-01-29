@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     # JWT | Security
     SECRET_KEY: str
     ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 300
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
 
     # Mail
@@ -21,9 +21,6 @@ class Settings(BaseSettings):
     MAIL_SERVER: str = "smtp.mail.ru"
     MAIL_FROM_NAME: str = "TaskManager API"
 
-    # Admin mail
-    ADMIN_EMAIL: str = "admin@example.com"
-
     # Redis
     REDIS_URL: str = "redis://localhost:6379/0"
 
@@ -32,6 +29,12 @@ class Settings(BaseSettings):
 
     # Last work hour
     LAST_HOUR: int = 19
+
+    # Admin mail
+    ADMIN_EMAIL: str = "admin@example.com"
+
+    # Corporate Email domain
+    COMPANY_DOMAIN: str = "example.com"
 
     class Config:
         env_file = ".env"

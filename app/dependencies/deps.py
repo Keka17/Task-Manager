@@ -11,6 +11,7 @@ from app.exceptions.users import (
 from app.exceptions.tokens import InvalidTokenTypeException, InvalidTokenException
 from app.db.models import User as UserModel
 from app.db.database import get_db_connection
+from app.db.database import AsyncSessionLocal
 
 
 async def get_user_from_payload(payload: dict, session: AsyncSession) -> UserModel:

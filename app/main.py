@@ -61,7 +61,7 @@ app.include_router(auth.router)
 app.include_router(tasks.router)
 app.include_router(websocket_board.router)
 
-app.mount("/static", StaticFiles(directory="app/styles"), name="static")
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 
 @app.get("/")

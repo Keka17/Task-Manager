@@ -37,21 +37,22 @@ class TaskService:
         now_local = datetime.now(LOCAL_TZ)
 
         level = task_data.importance_level
-        deadline = None
+        default_deadline = now_local.replace(
+            hour=LAST_WORK_HOUR, minute=0, second=0, microsecond=0
+        )
 
         if level == "A":
-            deadline = now_local.replace(
-                hour=LAST_WORK_HOUR, minute=0, second=0, microsecond=0
-            )
+            deadline = default_deadline
 
             if now_local > deadline:
                 deadline += timedelta(days=1)
+
         elif level == "B":
-            deadline = now_local + timedelta(days=7)
+            deadline = default_deadline + timedelta(days=7)
         elif level == "C":
-            deadline = now_local + timedelta(hours=48)
+            deadline = default_deadline + timedelta(days=2)
         else:
-            deadline = now_local + timedelta(days=30)
+            deadline = default_deadline + timedelta(days=14)
 
         new_task = TaskModel(
             **task_data.model_dump(), user_id=current_user.id, deadline_date=deadline
@@ -61,8 +62,9 @@ class TaskService:
         await session.commit()
         await session.refresh(new_task)
 
-        if new_task.importance_level == "A":
-            await send_async_email(new_task, "task_notification.html")
+        # if new_task.importance_level == "A":
+        #     await send_async_email(new_task, "Уведомление о задаче наивысшего приоритета",
+        #                            "task_notification.html")
 
         return new_task
 
@@ -186,6 +188,12 @@ class TaskService:
 
         await session.commit()
         await session.refresh(task)
+
+        await send_async_email(
+            task,
+            "Уведомление о задаче: комментарий администратора",
+            "remark_notification.html",
+        )
 
         return task
 

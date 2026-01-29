@@ -26,7 +26,7 @@ conf = ConnectionConfig(
 )
 
 
-async def send_async_email(task, template):
+async def send_async_email(task, subject, template):
     """
     Asynchronous sending of notification letters about level A tasks.
     """
@@ -36,10 +36,11 @@ async def send_async_email(task, template):
         "content": task.content,
         "deadline": deadline,
         "admin_email": settings.ADMIN_EMAIL,
+        "remark": task.remark,
     }
 
     message = MessageSchema(
-        subject=f"Уведомление о задаче наивысшего приоритета",
+        subject=subject,
         recipients=[task.user_email],
         template_body=template_data,
         subtype=MessageType.html,
