@@ -34,7 +34,7 @@ class Settings(BaseSettings):
     ADMIN_EMAIL: str = "admin@example.com"
 
     # Corporate Email domain
-    COMPANY_DOMAIN: str = "example.com"
+    COMPANY_DOMAIN: str | None = None
 
     class Config:
         env_file = ".env"

@@ -1,5 +1,8 @@
 from pydantic import BaseModel, field_validator, EmailStr, ConfigDict, ValidationInfo
 import re
+from app.core.config import get_settings
+
+settings = get_settings()
 
 
 class UserBase(BaseModel):
@@ -44,13 +47,14 @@ class UserCreate(UserBase):
 
     # @field_validator("email")
     # @classmethod
-    # def check_email(cls, email: str, info: ValidationInfo) -> EmailStr:
+    # def check_email(cls, email: str) -> EmailStr:
     #     # Define allowed corporate domain
-    #     allowed_domain = "example.com"
+    #     allowed_domain = settings.COMPANY_DOMAIN
     #
     #     if not email.lower().endswith(f"@{allowed_domain}"):
-    #         raise ValueError(f"Email должен содержать домен {allowed_domain}")
-    #     return email
+    #         raise ValueError(f"Регистрация доступна только для сотрудников: @{allowed_domain}")
+    #
+    #     return email.lower()
 
     @field_validator("password")
     @classmethod

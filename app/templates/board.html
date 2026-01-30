@@ -35,7 +35,7 @@
         <!-- Q3 -->
         <section class="quadrant q3">
                  <header class="quadrant-header">
-                C. Важно / Не срочно<br />
+                C. Не важно / Срочно<br />
                 <span>Умеренный приоритет</span>
             </header>
             <ul class="task-list" id="q3"></ul>
@@ -168,7 +168,7 @@
             console.log('WebSocket connected');
         };
 
-        socket.onmessage = (event) => {
+        socket.onmessage = function(event)  {
     const data = JSON.parse(event.data);
     console.log('WebSocket event:', data);
 
@@ -183,6 +183,12 @@
     refreshBoardData();
     showNotification(`The task "${data.title}" has been updated`);
 }
+
+    if (data.event == 'task_completed') {
+    console.log('Update detected!');
+    showNotification(`The task "${data.title}" has been completed`);
+    refreshBoardData();
+    }
 
 if (data.event === 'task_deleted') {
     console.log('Update detected!');
@@ -214,8 +220,6 @@ if (data.event === 'task_deleted') {
     } catch (error) {
         console.error('Failed to create WebSocket:', error);
     }
-
-    /* ---------- Загрузка задач ---------- */
 
     /* ---------- Открытие задачи ---------- */
     async function openTask(id) {

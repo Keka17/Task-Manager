@@ -171,7 +171,6 @@ class TaskService:
 
         await session.commit()
         await session.refresh(task_in_db)
-
         return task_in_db
 
     @staticmethod

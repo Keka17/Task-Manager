@@ -139,7 +139,9 @@ async def complete_task(
     Adds a timestamp to the 'completed_at' field as a task
     completion indicator. Only available to its author.
     """
-    return await TaskService.complete_task(task_id, current_user, session)
+    task_to_complete = await TaskService.complete_task(task_id, current_user, session)
+    await manager.broadcast({"event": "task_completed", "task": task_to_complete.title})
+    return {"message": f"Задача '{task_to_complete.title}' завершена."}
 
 
 @router.patch("/remark/{task_id}", response_model=TaskSchema)
