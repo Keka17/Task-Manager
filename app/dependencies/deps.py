@@ -1,3 +1,4 @@
+import jwt
 from fastapi.params import Depends
 from fastapi import WebSocket, status
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -59,25 +60,25 @@ async def admin_required(
     return current_user
 
 
-async def get_current_user_ws(websocket: WebSocket) -> UserModel:
+async def get_current_user_ws(websocket: WebSocket) -> dict:
     """
     Retrieves the profile of the currently authenticated user by decoding JWT token.
     For WebSocket (as a query parameter).
+
+    https://hexshift.medium.com/authenticating-websocket-clients-in-fastapi-with-jwt-and-dependency-injection-d636d48fdf48
     """
     token = websocket.query_params.get("token")
 
     if not token:
-        await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
+        await websocket.close(code=1008)
+        raise ValueError("Missing token")
 
     try:
-        payload = decode_jwt_token(token)
-    except:
-        await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
-
-    async with get_db_connection() as session:
-        try:
-            user = await get_user_from_payload(payload, session)
-        except Exception:
-            await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
-
-    return user
+        payload = decode_jwt_token(token=token)
+        return payload
+    except jwt.ExpiredSignatureError:
+        await websocket.close(code=4001)
+        raise ValueError("Token expired")
+    except jwt.InvalidTokenError:
+        await websocket.close(code=4002)
+        raise ValueError("Invalid token")

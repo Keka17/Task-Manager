@@ -102,42 +102,6 @@
 
     console.log('Token found, initializing board...');
 
-    /* ---------- WebSocket ---------- */
-    let socket;
-    try {
-        socket = new WebSocket(`ws://${location.host}/ws?token=${token}`);
-
-        socket.onopen = () => {
-            console.log('WebSocket connected');
-        };
-
-        socket.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-            console.log('WebSocket event:', data);
-
-            // Если кто-то присоединился/вышел или задача обновилась
-            if (data.event === 'user_joined' || data.event === 'user_left' || data.event === 'task_updated') {
-                // Можно обновить список задач или показать уведомление
-                console.log(`${data.email} ${data.event === 'user_joined' ? 'joined' : 'left'}`);
-            }
-        };
-
-        socket.onerror = (error) => {
-            console.error('WebSocket error:', error);
-            if (error.message.includes('401') || error.message.includes('403')) {
-                alert('Authentication failed. Please login again.');
-                logout();
-            }
-        };
-
-        socket.onclose = () => {
-            console.log('WebSocket disconnected');
-        };
-    } catch (error) {
-        console.error('Failed to create WebSocket:', error);
-    }
-
-    /* ---------- Загрузка задач ---------- */
     async function loadTasks() {
     try {
         const res = await fetch("/tasks/board", {
@@ -181,10 +145,77 @@
             ul.appendChild(li);
         });
 
-    } catch (error) {
+        } catch (error) {
         console.error("Error loading tasks:", error);
     }
 }
+
+    function refreshBoardData() {
+        console.log("Refreshing board...");
+        loadTasks();
+    }
+
+    function showNotification(message) {
+        console.log("Notification:", message);
+    }
+
+    /* ---------- WebSocket ---------- */
+    let socket;
+    try {
+        socket = new WebSocket(`ws://${location.host}/ws?token=${token}`);
+
+        socket.onopen = () => {
+            console.log('WebSocket connected');
+        };
+
+        socket.onmessage = (event) => {
+    const data = JSON.parse(event.data);
+    console.log('WebSocket event:', data);
+
+    if (data.event === 'task_created') {
+        console.log('Detected task change, refreshing...');
+        refreshBoardData();
+        showNotification(`The task "${data.title}" has been created`);
+    }
+
+    if (data.event === 'task_updated') {
+    console.log('Update detected!');
+    refreshBoardData();
+    showNotification(`The task "${data.title}" has been updated`);
+}
+
+if (data.event === 'task_deleted') {
+    console.log('Update detected!');
+    showNotification(`The task "${data.title}" has been deleted`);
+    refreshBoardData();
+}
+
+
+
+
+    if (data.event === 'user_joined' || data.event === 'user_left') {
+        const actionText = data.event === 'user_joined' ? 'joined' : 'left';
+        showNotification(`User ${data.email} ${actionText}`);
+        // При желании можно тоже обновлять доску, чтобы видеть актуальных авторов
+    }
+};
+
+        socket.onerror = (error) => {
+            console.error('WebSocket error:', error);
+            if (error.message.includes('401') || error.message.includes('403')) {
+                alert('Authentication failed. Please login again.');
+                logout();
+            }
+        };
+
+        socket.onclose = (event) => {
+    console.log(`Code: ${event.code}, Reason: ${event.reason}`);
+};
+    } catch (error) {
+        console.error('Failed to create WebSocket:', error);
+    }
+
+    /* ---------- Загрузка задач ---------- */
 
     /* ---------- Открытие задачи ---------- */
     async function openTask(id) {

@@ -13,7 +13,7 @@ from app.api.schemas.tasks import (
 )
 from app.services.task_service import TaskService
 from app.dependencies.deps import admin_required, get_current_user
-from app.api.websocket_board import manager
+from app.core.websocket_manager import manager
 
 router = APIRouter(prefix="/tasks", tags=["Tasks"])
 
@@ -28,9 +28,18 @@ async def create_task(
     Creating a task with storage in the database.
     Only accessible with a valid Access Token in the Authorization header.
     """
-    task = await TaskService.create_task(task_in, current_user, session)
-    await manager.broadcast({"event": "task_created", "task": task})
-    return task
+    new_task = await TaskService.create_task(task_in, current_user, session)
+    await manager.broadcast(
+        {
+            "event": "task_created",
+            "name": current_user.name,
+            "task_id": new_task.id,
+            "level": new_task.importance_level,
+            "title": new_task.title,
+        }
+    )
+
+    return new_task
 
 
 @router.get("/", response_model=list[TaskSchema])
@@ -104,7 +113,20 @@ async def update_task(
     Updating the "content" field of a specific task.
     Only available to its author.
     """
-    return await TaskService.update_task(task_id, task_update, current_user, session)
+    updated_task = await TaskService.update_task(
+        task_id, task_update, current_user, session
+    )
+    await manager.broadcast(
+        {
+            "event": "task_updated",
+            "task_id": updated_task.id,
+            "level": updated_task.importance_level,
+            "title": updated_task.title,
+            "content_upd": updated_task.content,
+        }
+    )
+
+    return updated_task
 
 
 @router.patch("/complete/{task_id}", response_model=TaskSchema)
@@ -143,4 +165,13 @@ async def delete_task(
     """
     Deleting a specific task. Only available to its author.
     """
-    return await TaskService.delete_task(task_id, current_user, session)
+    task_to_delete = await TaskService.get_task_by_id(task_id, current_user, session)
+    task_title = task_to_delete.title
+    await TaskService.delete_task(task_id, current_user, session)
+    await manager.broadcast(
+        {
+            "event": "task_deleted",
+            "title": task_title,
+        }
+    )
+    return {"message": f"Задача '{task_title}' успешно удалена."}

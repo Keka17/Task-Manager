@@ -198,9 +198,7 @@ class TaskService:
         return task
 
     @staticmethod
-    async def delete_task(
-        task_id: int, current_user: UserModel, session: AsyncSession
-    ) -> dict:
+    async def delete_task(task_id: int, current_user: UserModel, session: AsyncSession):
         query = select(TaskModel).where(TaskModel.id == task_id)
         result = await session.execute(query)
         task_in_db = result.scalars().first()
@@ -213,5 +211,3 @@ class TaskService:
 
         await session.delete(task_in_db)
         await session.commit()
-
-        return {"message": f"Задача с id = {task_id} успешно удалена."}
