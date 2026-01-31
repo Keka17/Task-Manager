@@ -31,10 +31,13 @@ class Settings(BaseSettings):
     LAST_HOUR: int = 19
 
     # Admin mail
-    ADMIN_EMAIL: str = "admin@example.com"
+    ADMIN_EMAIL: str
 
     # Corporate Email domain
     COMPANY_DOMAIN: str | None = None
+
+    # Employees positions
+    POSITIONS: str | None = None
 
     class Config:
         env_file = ".env"

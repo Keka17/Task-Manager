@@ -75,7 +75,7 @@ function showNotification(message) {
 /* ---------- WebSocket ---------- */
 let socket;
 try {
-    socket = new WebSocket(`ws://${location.host}/ws?token=${token}`);
+    socket = new WebSocket(`ws://localhost:8000/ws?token=${token}`);
 
     socket.onopen = () => {
         console.log('WebSocket connected');

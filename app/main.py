@@ -52,6 +52,8 @@ logger.add(
 
 app = FastAPI()
 
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
+
 app.middleware("http")(loguru_middleware)
 app.add_exception_handler(AppException, app_exception_handler)
 app.add_exception_handler(RequestValidationError, validation_exception_handler)
@@ -60,8 +62,6 @@ app.include_router(users.router)
 app.include_router(auth.router)
 app.include_router(tasks.router)
 app.include_router(websocket_board.router)
-
-app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 
 @app.get("/")

@@ -28,33 +28,31 @@ class UserCreate(UserBase):
     @field_validator("position")
     @classmethod
     def check_position(cls, position: str) -> str:
-        positions_list = [
-            "CEO",
-            "Продакт-мененджер",
-            "Frontend-разработчик",
-            "Backend-разработчик",
-            "UX-специалист",
-            "SMM-специалист",
-        ]
-        allowed_positions = ", ".join(positions_list)
-
-        if position not in positions_list:
-            raise ValueError(
-                f"Позиции не существует. Доступные позиции:\n{allowed_positions}"
-            )
+        positions = settings.POSITIONS
+        if positions:
+            positions_list = positions.split(",")
+            print(f"POSITIONS: {positions_list}")
+            allowed_positions = ", ".join(positions_list)
+            if position not in positions_list:
+                raise ValueError(
+                    f"Позиции не существует. Доступные позиции:\n{allowed_positions}"
+                )
 
         return position
 
-    # @field_validator("email")
-    # @classmethod
-    # def check_email(cls, email: str) -> EmailStr:
-    #     # Define allowed corporate domain
-    #     allowed_domain = settings.COMPANY_DOMAIN
-    #
-    #     if not email.lower().endswith(f"@{allowed_domain}"):
-    #         raise ValueError(f"Регистрация доступна только для сотрудников: @{allowed_domain}")
-    #
-    #     return email.lower()
+    @field_validator("email")
+    @classmethod
+    def check_email(cls, email: str) -> EmailStr:
+        # Define allowed corporate domain
+        allowed_domain = settings.COMPANY_DOMAIN
+
+        if allowed_domain:
+            if not email.lower().endswith(f"@{allowed_domain}"):
+                raise ValueError(
+                    f"Регистрация доступна только для сотрудников: @{allowed_domain}"
+                )
+
+        return email.lower()
 
     @field_validator("password")
     @classmethod
