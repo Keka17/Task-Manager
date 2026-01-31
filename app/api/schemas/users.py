@@ -15,31 +15,6 @@ class UserBase(BaseModel):
 class UserCreate(UserBase):
     password: str
 
-    @field_validator("name")
-    @classmethod
-    def check_name(cls, name: str) -> str:
-        pattern = r"^[А-ЯЁ][а-яё]{1,30}(?:[- ][А-ЯЁ][а-яё]{1,30}){2}$"
-
-        if re.fullmatch(pattern, name):
-            return name
-        else:
-            raise ValueError("Некорректная запись ФИО!")
-
-    @field_validator("position")
-    @classmethod
-    def check_position(cls, position: str) -> str:
-        positions = settings.POSITIONS
-        if positions:
-            positions_list = positions.split(",")
-            print(f"POSITIONS: {positions_list}")
-            allowed_positions = ", ".join(positions_list)
-            if position not in positions_list:
-                raise ValueError(
-                    f"Позиции не существует. Доступные позиции:\n{allowed_positions}"
-                )
-
-        return position
-
     @field_validator("email")
     @classmethod
     def check_email(cls, email: str) -> EmailStr:
