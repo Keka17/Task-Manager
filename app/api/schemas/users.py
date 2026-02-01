@@ -15,6 +15,20 @@ class UserBase(BaseModel):
 class UserCreate(UserBase):
     password: str
 
+    @field_validator("position")
+    @classmethod
+    def check_position(cls, position: str) -> str:
+        positions = settings.POSITIONS
+        if positions:
+            positions_list = positions.split(",")
+            allowed_positions = ", ".join(positions_list)
+            if position not in positions_list:
+                raise ValueError(
+                    f"Позиции не существует. Доступные позиции:\n{allowed_positions}"
+                )
+
+        return position
+
     @field_validator("email")
     @classmethod
     def check_email(cls, email: str) -> EmailStr:

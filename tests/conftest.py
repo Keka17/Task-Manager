@@ -1,6 +1,5 @@
 import pytest
 from httpx import ASGITransport, AsyncClient
-from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 
 from app.main import app
@@ -11,9 +10,6 @@ from app.core.config import get_settings
 settings = get_settings()
 
 TEST_DATABASE_URL = settings.TEST_DATABASE_URL
-
-# engine = create_async_engine(TEST_DATABASE_URL)
-# AsyncSessionLocal = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
 
 @pytest.fixture(scope="session")
@@ -55,3 +51,15 @@ async def client(async_session):
         yield ac
 
     app.dependency_overrides.clear()
+
+
+@pytest.fixture
+def mock_settings(monkeypatch):
+    """Mocking positions and domains for tests."""
+    test_settings = get_settings()
+    test_settings.POSITIONS = "CEO,SMM-специалист,UI-дизайнер"
+    test_settings.COMPANY_DOMAIN = "example.com"
+
+    monkeypatch.setattr("app.core.config.get_settings", lambda: test_settings)
+
+    yield test_settings
