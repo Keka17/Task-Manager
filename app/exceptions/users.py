@@ -1,3 +1,5 @@
+from celery.bin.control import status
+
 from .base import AppException
 
 
@@ -37,4 +39,11 @@ class AdminAccessRequired(AppException):
             status_code=403,
             message="Запрещено: требуется доступ администратора.",
             error_code="FORBIDDEN",
+        )
+
+
+class UnauthorizedException(AppException):
+    def __init__(self):
+        super().__init__(
+            status_code=401, message="Вы не авторизованы.", error_code="UNAUTHORIZED"
         )

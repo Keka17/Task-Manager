@@ -9,7 +9,7 @@ from app.core.security import (
     create_access_token,
     create_refresh_token,
 )
-from tests.conftest import mock_settings
+from tests.conftest import mock_settings, client, async_session
 
 
 async def test_create_user_success(client, async_session):
@@ -34,6 +34,7 @@ async def test_create_user_success(client, async_session):
     new_user = result.scalars().first()
 
     assert new_user.id is not None
+    assert new_user.is_superuser is False
     assert new_user.name == payload["name"]
     assert new_user.hashed_password != payload["password"]
 
@@ -99,3 +100,125 @@ async def test_create_user_bad_password_phone(client, async_session):
     assert "Некорректная запись!" in response.text
     assert "Field: ('body', 'password')" in response.text
     assert "Слабый пароль!" in response.text
+
+
+async def test_get_users_access_control(client, async_session):
+    """
+    Testing endpoint access control (admin only).
+    Endpoint GET /users.
+    """
+    await add_users(async_session)
+
+    admin_token = create_access_token({"sub": "dundermifflin@example.com"})
+    headers_admin = {"Authorization": f"Bearer {admin_token}"}
+
+    response_admin = await client.get("/users/", headers=headers_admin)
+    assert response_admin.status_code == 200
+    assert len(response_admin.json()) == 3
+
+    # Authorization with invalid token type (refresh)
+    admin_refresh_token = create_refresh_token({"sub": "dundermifflin@example.com"})
+    headers = {"Authorization": f"Bearer {admin_refresh_token}"}
+
+    response = await client.get("/users/", headers=headers)
+    assert response.status_code == 401
+    assert response.json()["error_code"] == "INVALID_TOKEN_TYPE"
+
+    # Regular user without administrative privileges
+    user_token = create_access_token({"sub": "p.parker@example.com"})
+    headers_user = {"Authorization": f"Bearer {user_token}"}
+
+    response_user = await client.get("/users/", headers=headers_user)
+    assert response_user.status_code == 403
+    assert response_user.json()["error_code"] == "FORBIDDEN"
+
+    # Trying to reach without auth
+    response = await client.get("/users/")
+    assert response.status_code == 401
+    assert response.json()["error_code"] == "UNAUTHORIZED"
+
+
+async def test_get_user_access_control(client, async_session):
+    """
+    Testing endpoint access control (admin only).
+    Endpoint GET /users/{user_id}.
+    """
+    await add_users(async_session)
+
+    admin_token = create_access_token({"sub": "dundermifflin@example.com"})
+    headers_admin = {"Authorization": f"Bearer {admin_token}"}
+
+    existing_user_id = 2
+
+    response_admin = await client.get(
+        f"/users/{existing_user_id}", headers=headers_admin
+    )
+
+    assert response_admin.status_code == 200
+
+    user = response_admin.json()
+    assert user["name"] == "Паркер Питер Бенджами"
+
+    non_existing_user_id = 999
+
+    response_admin = await client.get(
+        f"/users/{non_existing_user_id}", headers=headers_admin
+    )
+    assert response_admin.status_code == 404
+    assert response_admin.json()["error_code"] == "NOT FOUND"
+
+    # Regular user without administrative privileges
+    user_token = create_access_token({"sub": "p.parker@example.com"})
+    headers_user = {"Authorization": f"Bearer {user_token}"}
+
+    response_user = await client.get(f"/users/{existing_user_id}", headers=headers_user)
+    assert response_user.status_code == 403
+    assert response_user.json()["error_code"] == "FORBIDDEN"
+
+    # Trying to reach without auth
+    response = await client.get(f"/users/{existing_user_id}")
+    assert response.status_code == 401
+    assert response.json()["error_code"] == "UNAUTHORIZED"
+
+
+async def test_delete_user_access_control(client, async_session):
+    """
+    Testing endpoint access control (admin only).
+    Endpoint DELETE /users/{user_id}.
+    """
+    await add_users(async_session)
+    admin_token = create_access_token({"sub": "dundermifflin@example.com"})
+    headers_admin = {"Authorization": f"Bearer {admin_token}"}
+
+    existing_user_id = 3
+
+    response_admin = await client.delete(
+        f"/users/{existing_user_id}", headers=headers_admin
+    )
+
+    assert response_admin.status_code == 200
+    assert "успешно удален" in response_admin.json()["message"]
+
+    non_existing_user_id = 999
+
+    response_admin = await client.delete(
+        f"/users/{non_existing_user_id}", headers=headers_admin
+    )
+
+    assert response_admin.status_code == 404
+    assert response_admin.json()["error_code"] == "NOT FOUND"
+
+    # Regular user without administrative privileges
+    user_token = create_access_token({"sub": "p.parker@example.com"})
+    headers_user = {"Authorization": f"Bearer {user_token}"}
+
+    response_user = await client.delete(
+        f"/users/{existing_user_id}", headers=headers_user
+    )
+    assert response_user.status_code == 403
+    assert response_user.json()["error_code"] == "FORBIDDEN"
+
+    # Trying to reach without auth
+    response = await client.delete(f"/users/{existing_user_id}")
+    assert response.status_code == 401
+    assert response.json()["error_code"] == "UNAUTHORIZED"

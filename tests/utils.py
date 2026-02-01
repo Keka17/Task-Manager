@@ -4,6 +4,7 @@ from app.db.models import User
 async def add_users(db):
     users = [
         User(
+            id=1,
             name="Скотт Майкл Георгиевич",
             hashed_password="$2b$12$7Z6RAKy5guMxCI1SZ6TnPe3nc7YA9MZwNpKIye3II5mhv2RI..jsq",
             position="CEO",
@@ -12,6 +13,7 @@ async def add_users(db):
             phone="89777907157",
         ),
         User(
+            id=2,
             name="Паркер Питер Бенджами",
             hashed_password="$2b$12$7Z6RAKy5guMxCI1SZ6TnPe3nc7YA9MZwNpKIye3II5mhv2RI..jsq",
             position="SMM-специалист",
@@ -20,6 +22,7 @@ async def add_users(db):
             phone="89100000102",
         ),
         User(
+            id=3,
             name="Бриджертон Бенедикт Эдмундович",
             hashed_password="$2b$12$7Z6RAKy5guMxCI1SZ6TnPe3nc7YA9MZwNpKIye3II5mhv2RI..jsq",
             position="UI-дизайнер",

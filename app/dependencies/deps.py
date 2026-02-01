@@ -1,6 +1,6 @@
 import jwt
 from fastapi.params import Depends
-from fastapi import WebSocket, status
+from fastapi import WebSocket
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 

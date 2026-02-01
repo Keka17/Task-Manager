@@ -6,12 +6,13 @@ from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
 
 from app.exceptions.tokens import TokenExpiredException, InvalidTokenException
+from app.exceptions.users import UnauthorizedException
 from app.core.config import get_settings
 
 settings = get_settings()
 
 # Extracts the token from the Authorization header
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login", auto_error=False)
 
 SECRET_KEY = settings.SECRET_KEY
 ALGORITHM = settings.ALGORITHM
@@ -55,6 +56,8 @@ def decode_jwt_token(token: str = Depends(oauth2_scheme)) -> dict:
     """
     Extracts user information from the access token.
     """
+    if not token:
+        raise UnauthorizedException()
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         return payload
