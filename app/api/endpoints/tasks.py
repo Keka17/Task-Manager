@@ -1,6 +1,6 @@
 from typing import Optional
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, BackgroundTasks
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.database import get_db_connection
@@ -21,6 +21,7 @@ router = APIRouter(prefix="/tasks", tags=["Tasks"])
 @router.post("/", response_model=TaskSchema)
 async def create_task(
     task_in: TaskCreate,
+    backgroud_tasks: BackgroundTasks,
     current_user: UserModel = Depends(get_current_user),
     session: AsyncSession = Depends(get_db_connection),
 ):
@@ -28,7 +29,9 @@ async def create_task(
     Creating a task with storage in the database.
     Only accessible with a valid Access Token in the Authorization header.
     """
-    new_task = await TaskService.create_task(task_in, current_user, session)
+    new_task = await TaskService.create_task(
+        task_in, current_user, session, backgroud_tasks
+    )
     await manager.broadcast(
         {
             "event": "task_created",
@@ -148,6 +151,7 @@ async def complete_task(
 async def create_remark(
     task_id: int,
     task_update: TaskUpdateAdmin,
+    backgroud_tasks: BackgroundTasks,
     session: AsyncSession = Depends(get_db_connection),
     admin: UserModel = Depends(admin_required),
 ):
@@ -155,7 +159,9 @@ async def create_remark(
     Creating a remark for a specific task.
     Only available to users with administrative privileges only.
     """
-    return await TaskService.create_remark(task_id, task_update, session)
+    return await TaskService.create_remark(
+        task_id, task_update, session, backgroud_tasks
+    )
 
 
 @router.delete("/{task_id}")

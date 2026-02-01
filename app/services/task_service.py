@@ -1,6 +1,7 @@
 from datetime import datetime, timezone, timedelta
 from zoneinfo import ZoneInfo
 
+from fastapi import BackgroundTasks
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
@@ -33,6 +34,7 @@ class TaskService:
         task_data: TaskCreate,
         current_user: UserModel,
         session: AsyncSession,
+        background_tasks: BackgroundTasks,
     ) -> TaskModel:
         now_local = datetime.now(LOCAL_TZ)
 
@@ -62,9 +64,13 @@ class TaskService:
         await session.commit()
         await session.refresh(new_task)
 
-        # if new_task.importance_level == "A":
-        #     await send_async_email(new_task, "Уведомление о задаче наивысшего приоритета",
-        #                            "task_notification.html")
+        if new_task.importance_level == "A":
+            background_tasks.add_task(
+                send_async_email,
+                new_task,
+                "Уведомление о задаче наивысшего приоритета",
+                "task_notification.html",
+            )
 
         return new_task
 
@@ -174,7 +180,12 @@ class TaskService:
         return task_in_db
 
     @staticmethod
-    async def create_remark(task_id: int, task_remark, session: AsyncSession):
+    async def create_remark(
+        task_id: int,
+        task_remark,
+        session: AsyncSession,
+        background_tasks: BackgroundTasks,
+    ):
         query = select(TaskModel).where(TaskModel.id == task_id)
         result = await session.execute(query)
         task = result.scalars().first()
@@ -188,7 +199,8 @@ class TaskService:
         await session.commit()
         await session.refresh(task)
 
-        await send_async_email(
+        background_tasks.add_task(
+            send_async_email,
             task,
             "Уведомление о задаче: комментарий администратора",
             "remark_notification.html",
