@@ -6,7 +6,7 @@ class TaskNotFoundException(AppException):
         super().__init__(
             status_code=404,
             message=f"Задача {task_id} не найдена.",
-            error_code="NOT FOUND",
+            error_code="NOT_FOUND",
         )
 
 
@@ -28,7 +28,7 @@ class InvalidImportanceLevelException(AppException):
             "B - Важно и не срочно, "
             "C - Не важно и срочно, "
             "D - Не срочно и не важно.",
-            error_code="UNPROCESSABLE ENTITY",
+            error_code="UNPROCESSABLE_ENTITY",
         )
 
 
@@ -37,5 +37,5 @@ class TaskAlreadyCompletedException(AppException):
         super().__init__(
             status_code=400,
             message="Задача уже решена.",
-            error_code="BAD REQUEST",
+            error_code="BAD_REQUEST",
         )

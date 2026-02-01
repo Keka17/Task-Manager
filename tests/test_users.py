@@ -2,10 +2,7 @@ from sqlalchemy import select
 from app.db.models import User
 from tests.utils import add_users
 
-import jwt
 from app.core.security import (
-    SECRET_KEY,
-    ALGORITHM,
     create_access_token,
     create_refresh_token,
 )
@@ -59,43 +56,26 @@ async def test_create_user_duplicate(client, async_session, mock_settings):
     assert response.json()["error_code"] == "CONFLICT"
 
 
-async def test_create_user_bad_domain_position(client, async_session, mock_settings):
+async def test_create_user_fail(client, async_session, mock_settings):
     """
-    Validation Error 400: non-existent position and invalid domain.
+    Validation Errors: invalid domain, phone number, position and weak password.
     Endpoint POST /users/signup.
     """
     payload = {
         "name": "Брэдшоу Кэролайн Сергеевна",
         "position": "Стажер SMM",
         "email": "carrie_ny@gmail.com",
-        "phone": "89649264354",
-        "password": "Il0veM@ano1o",
-    }
-    response = await client.post("/users/signup", json=payload)
-
-    assert response.status_code == 400
-    assert "Field: ('body', 'email')" in response.text
-    assert "Регистрация доступна только для сотрудников" in response.text
-    assert "Field: ('body', 'position')" in response.text
-    assert "Позиции не существует" in response.text
-
-
-async def test_create_user_bad_password_phone(client, async_session):
-    """
-    Validation Error 400: a weak password and invalid phone number.
-    Endpoint POST /users/signup.
-    """
-    payload = {
-        "name": "Брэдшоу Кэролайн Сергеевна",
-        "position": "SMM-специалист",
-        "email": "carrie_ny@example.com",
         "phone": "+79649264354",
         "password": "passWOrd",
     }
-
     response = await client.post("/users/signup", json=payload)
 
     assert response.status_code == 400
+
+    assert "Field: ('body', 'position')" in response.text
+    assert "Позиции не существует" in response.text
+    assert "Field: ('body', 'email')" in response.text
+    assert "Регистрация доступна только для сотрудников" in response.text
     assert "Field: ('body', 'phone')" in response.text
     assert "Некорректная запись!" in response.text
     assert "Field: ('body', 'password')" in response.text
@@ -165,7 +145,7 @@ async def test_get_user_access_control(client, async_session):
         f"/users/{non_existing_user_id}", headers=headers_admin
     )
     assert response_admin.status_code == 404
-    assert response_admin.json()["error_code"] == "NOT FOUND"
+    assert response_admin.json()["error_code"] == "NOT_FOUND"
 
     # Regular user without administrative privileges
     user_token = create_access_token({"sub": "p.parker@example.com"})
@@ -206,7 +186,7 @@ async def test_delete_user_access_control(client, async_session):
     )
 
     assert response_admin.status_code == 404
-    assert response_admin.json()["error_code"] == "NOT FOUND"
+    assert response_admin.json()["error_code"] == "NOT_FOUND"
 
     # Regular user without administrative privileges
     user_token = create_access_token({"sub": "p.parker@example.com"})

@@ -18,6 +18,14 @@ ALGORITHM = settings.ALGORITHM
 templates = Jinja2Templates(directory="app/templates")
 
 
+@router.get("/login-page", response_class=HTMLResponse)
+async def login_page(request: Request):
+    """
+    Displays the HTML login page for the board.
+    """
+    return templates.TemplateResponse("login.html", {"request": request})
+
+
 @router.post("/login")
 async def login(user_in: UserLogin, session: AsyncSession = Depends(get_db_connection)):
     """
@@ -25,14 +33,6 @@ async def login(user_in: UserLogin, session: AsyncSession = Depends(get_db_conne
     """
     tokens = await AuthService.login(user_in, session)
     return tokens
-
-
-@router.get("/login-page", response_class=HTMLResponse)
-async def login_page(request: Request):
-    """
-    Displays the HTML login page for the board.
-    """
-    return templates.TemplateResponse("login.html", {"request": request})
 
 
 @router.post("/refresh")

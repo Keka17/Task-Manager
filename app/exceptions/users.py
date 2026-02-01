@@ -6,7 +6,7 @@ from .base import AppException
 class UserNotFoundException(AppException):
     def __init__(self):
         super().__init__(
-            status_code=404, message="Пользователь не найден.", error_code="NOT FOUND"
+            status_code=404, message="Пользователь не найден.", error_code="NOT_FOUND"
         )
 
 
@@ -29,7 +29,7 @@ class InvalidCredentialsException(AppException):
         super().__init__(
             status_code=403,
             message="Неверные учетные данные.",
-            error_code="UNAUTHORIZED",
+            error_code="INVALID_CREDENTIALS",
         )
 
 

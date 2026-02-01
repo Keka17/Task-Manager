@@ -55,7 +55,7 @@ async def client(async_session):
 
 @pytest.fixture
 def mock_settings(monkeypatch):
-    """Mocking positions and domains for tests."""
+    """Mocking positions and domain for tests."""
     test_settings = get_settings()
     test_settings.POSITIONS = "CEO,SMM-специалист,UI-дизайнер"
     test_settings.COMPANY_DOMAIN = "example.com"
