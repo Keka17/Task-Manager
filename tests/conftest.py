@@ -57,7 +57,7 @@ async def client(async_session):
 def mock_settings(monkeypatch):
     """Mocking positions and domain for tests."""
     test_settings = get_settings()
-    test_settings.POSITIONS = "CEO,SMM-специалист,UI-дизайнер"
+    test_settings.POSITIONS = "CEO,Backend-разработчик,UI-дизайнер"
     test_settings.COMPANY_DOMAIN = "example.com"
 
     monkeypatch.setattr("app.core.config.get_settings", lambda: test_settings)

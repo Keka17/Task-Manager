@@ -1,22 +1,12 @@
 from freezegun import freeze_time
 from sqlalchemy import select
 
-from app.api.endpoints.auth import login, refresh_token
-from app.db.models import User, RevokedToken
+from app.db.models import RevokedToken
 from tests.utils import add_users
 from tests.conftest import client, async_session
-from app.core.security import (
-    create_access_token,
-    create_refresh_token,
-)
 
 import jwt
-from app.core.security import (
-    SECRET_KEY,
-    ALGORITHM,
-    create_access_token,
-    create_refresh_token,
-)
+from app.core.security import SECRET_KEY, ALGORITHM
 
 
 async def test_login_success(client, async_session):
