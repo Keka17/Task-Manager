@@ -179,6 +179,13 @@ async def test_delete_user_access_control(client, async_session):
     assert response_admin.status_code == 200
     assert "успешно удален" in response_admin.json()["message"]
 
+    # Check the db
+    query = select(User).where(User.id == existing_user_id)
+    result = await async_session.execute(query)
+    deleted_user = result.scalars().first()
+
+    assert deleted_user is None
+
     non_existing_user_id = 999
 
     response_admin = await client.delete(

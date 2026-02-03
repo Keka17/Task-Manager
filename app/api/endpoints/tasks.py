@@ -80,6 +80,18 @@ async def get_task_details(
     return await TaskService.get_task_by_id_board(task_id, session)
 
 
+@router.get("/my_tasks", response_model=list[TaskSchema])
+async def get_user_tasks(
+    current_user: UserModel = Depends(get_current_user),
+    session: AsyncSession = Depends(get_db_connection),
+):
+    """
+    Retrieving a list of all user tasks.
+    Only accessible with a valid Access Token in the Authorization header.
+    """
+    return await TaskService.get_my_tasks(current_user, session)
+
+
 @router.get("/{task_id}", response_model=TaskSchema)
 async def get_task(
     task_id: int,
@@ -91,18 +103,6 @@ async def get_task(
     Only accessible with a valid Access Token in the Authorization header.
     """
     return await TaskService.get_task_by_id(task_id, current_user, session)
-
-
-@router.get("/my", response_model=list[TaskSchema])
-async def get_user_tasks(
-    current_user: UserModel = Depends(get_current_user),
-    session: AsyncSession = Depends(get_db_connection),
-):
-    """
-    Retrieving a list of all user tasks.
-    Only accessible with a valid Access Token in the Authorization header.
-    """
-    return await TaskService.get_my_tasks(current_user, session)
 
 
 @router.patch("/{task_id}", response_model=TaskSchema)
@@ -132,7 +132,7 @@ async def update_task(
     return updated_task
 
 
-@router.patch("/complete/{task_id}", response_model=TaskSchema)
+@router.patch("/complete/{task_id}")
 async def complete_task(
     task_id: int,
     current_user: UserModel = Depends(get_current_user),
