@@ -22,7 +22,7 @@ REFRESH_TOKEN_EXPIRE_DAYS = settings.REFRESH_TOKEN_EXPIRE_DAYS
 
 def create_jwt_token(
     data: dict, expires_delta: timedelta, token_type: str, include_jti: bool = False
-):
+) -> str:
     """
     Function for creating a JWT token. It copies the input data,
     adds the expiration time, and encodes the token.
@@ -35,17 +35,20 @@ def create_jwt_token(
     if include_jti:
         payload["jti"] = str(uuid.uuid4())
 
-    return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
+    token = jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
+    if isinstance(token, bytes):
+        return token.decode("utf-8")
+    return token
 
 
-def create_access_token(data: dict):
+def create_access_token(data: dict) -> str:
     """Creates access-type JWT token"""
     return create_jwt_token(
         data, timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES), token_type="access"
     )
 
 
-def create_refresh_token(data: dict):
+def create_refresh_token(data: dict) -> str:
     """Creates refresh-type JWT token"""
     return create_jwt_token(
         data, timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS), "refresh", include_jti=True
@@ -61,7 +64,8 @@ def decode_jwt_token(token: str = Depends(oauth2_scheme)) -> dict:
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         return payload
-    except jwt.ExpiredSignatureError:
+    except jwt.exceptions.ExpiredSignatureError:
         raise TokenExpiredException()
-    except jwt.InvalidTokenError:
+    except jwt.exceptions.InvalidTokenError as e:
+        print(f"JWT Error: {e}")
         raise InvalidTokenException()

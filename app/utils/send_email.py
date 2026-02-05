@@ -3,6 +3,7 @@ from zoneinfo import ZoneInfo
 
 from app.core.config import get_settings
 from pathlib import Path
+from loguru import logger
 
 settings = get_settings()
 
@@ -46,4 +47,8 @@ async def send_async_email(task, subject, template):
         subtype=MessageType.html,
     )
     fm = FastMail(conf)
-    await fm.send_message(message, template_name=template)
+    try:
+        await fm.send_message(message, template_name=template)
+    except Exception as e:
+        message = f"Error during sending a mail to {task.user_email}:\n{e}"
+        logger.add(lambda m: print(message, end=""), level="ERROR")

@@ -93,6 +93,7 @@ async def test_get_users_access_control(client, async_session):
     headers_admin = {"Authorization": f"Bearer {admin_token}"}
 
     response_admin = await client.get("/users/", headers=headers_admin)
+
     assert response_admin.status_code == 200
     assert len(response_admin.json()) == 3
 
@@ -133,7 +134,6 @@ async def test_get_user_access_control(client, async_session):
     response_admin = await client.get(
         f"/users/{existing_user_id}", headers=headers_admin
     )
-
     assert response_admin.status_code == 200
 
     user = response_admin.json()

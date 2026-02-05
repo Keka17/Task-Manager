@@ -171,7 +171,7 @@ async def delete_task(
     session: AsyncSession = Depends(get_db_connection),
 ):
     """
-    Deleting a specific task. Only available to its author.
+    Deleting a specific task. Only available to its author and to users with administrative privileges.
     """
     task_to_delete = await TaskService.get_task_by_id(task_id, current_user, session)
     task_title = task_to_delete.title

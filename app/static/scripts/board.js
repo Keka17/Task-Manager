@@ -1,8 +1,8 @@
-// Получаем токен
+// Receive a token
 const token = localStorage.getItem('access_token');
 
 if (!token) {
-    // Если нет токена, перенаправляем на страницу входа
+    // If no token, redirect to the login page
     alert('Please login first');
     window.location.href = '/auth/login-page';
     throw new Error('No token found');
@@ -31,21 +31,21 @@ async function loadTasks() {
             D: "q4"
         };
 
-        // Очищаем колонки перед добавлением
+        // Clean columns before adding tasks
         Object.values(map).forEach(id => {
             const ul = document.getElementById(id);
             if (ul) ul.innerHTML = '';
         });
 
-        // Добавляем задачи
+        // Add tasks
         tasks.forEach(t => {
             const ul = document.getElementById(map[t.importance_level]);
             if (!ul) return;
 
-            // СОЗДАЕМ ЭЛЕМЕНТ С КЛАССОМ task-item
+            // Create an element with the class task-item
             const li = document.createElement("li");
             li.className = "task-item";
-            li.onclick = (event) => openTask(t.id, event); // Передаем event
+            li.onclick = (event) => openTask(t.id, event);
 
             li.innerHTML = `
                 <div class="task-title">${t.title || 'No title'}</div>
@@ -115,7 +115,6 @@ try {
         if (data.event === 'user_joined' || data.event === 'user_left') {
             const actionText = data.event === 'user_joined' ? 'joined' : 'left';
             showNotification(`User ${data.email} ${actionText}`);
-            // При желании можно тоже обновлять доску, чтобы видеть актуальных авторов
         }
     };
 
@@ -134,7 +133,7 @@ try {
     console.error('Failed to create WebSocket:', error);
 }
 
-/* ---------- Открытие задачи ---------- */
+/* ---------- Task opening ---------- */
 async function openTask(id) {
     try {
         const res = await fetch(`/tasks/board/${id}`, {
@@ -150,7 +149,7 @@ async function openTask(id) {
         const task = await res.json();
         console.log('Task details:', task);
 
-        // Заполняем модальное окно
+        // Filling a modal window
         document.getElementById("modal-title").textContent = task.title;
         document.getElementById("modal-content").textContent = task.content;
         document.getElementById("modal-author").textContent = task.user ?.name || task.name || 'Unknown';
@@ -158,7 +157,7 @@ async function openTask(id) {
         document.getElementById("modal-date").textContent = formatDate(task.created_at);
         document.getElementById("modal-deadline").textContent = formatDate(task.deadline_date);
 
-        // Обработка ремарки
+        // Processing remarks
         const remarkSection = document.getElementById("remark-section");
         if (task.remark && task.remark.trim() !== '') {
             document.getElementById("modal-remark").textContent = task.remark;
@@ -167,7 +166,7 @@ async function openTask(id) {
             remarkSection.style.display = 'none';
         }
 
-        // Отображаем важность
+        //  Displaying importance
         const importanceBadge = document.getElementById("modal-importance");
         const importanceMap = {
             'A': {
@@ -200,10 +199,10 @@ async function openTask(id) {
         importanceBadge.style.fontSize = '12px';
         importanceBadge.style.fontWeight = '600';
 
-        // Показываем модальное окно
+        // Displaying a modal window
         document.getElementById("modal").style.display = "block";
         document.getElementById("modalOverlay").style.display = "block";
-        document.body.style.overflow = "hidden"; // Блокируем скролл
+        document.body.style.overflow = "hidden"; //Block scrolling
 
     } catch (error) {
         console.error("Error loading task details:", error);
@@ -211,14 +210,13 @@ async function openTask(id) {
     }
 }
 
-/* ---------- Закрытие модального окна ---------- */
 function closeModal() {
     document.getElementById("modal").style.display = "none";
     document.getElementById("modalOverlay").style.display = "none";
-    document.body.style.overflow = "auto"; // Возвращаем скролл
+    document.body.style.overflow = "auto"; // Returning scrolling
 }
 
-/* ---------- Вспомогательные функции ---------- */
+/* ---------- Utility functions ---------- */
 function formatDate(dateString) {
     const date = new Date(dateString);
     return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {
@@ -228,12 +226,12 @@ function formatDate(dateString) {
 }
 
 function logout() {
-    // Удаляем токен и перенаправляем
+    // Delete token and redirect
     localStorage.removeItem('access_token');
     window.location.href = '/auth/login-page';
 }
 
-// Закрытие модального окна при клике вне его/Escape button
+//  Closing the modal window when clicking outside it/Escape button
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' &&
         document.getElementById("modal").style.display === "block") {
@@ -241,5 +239,5 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-// Загружаем задачи при загрузке страницы
+// Loading tasks when loading a page
 document.addEventListener('DOMContentLoaded', loadTasks);

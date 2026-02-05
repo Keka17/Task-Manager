@@ -314,6 +314,17 @@ async def test_delete_task(client, async_session):
     await add_users(async_session)
     await add_tasks(async_session)
 
+    # Admin
+    token = create_access_token({"sub": "dundermifflin@example.com"})
+    headers = {"Authorization": f"Bearer {token}"}
+    task_id = 53
+
+    response = await client.delete(f"/tasks/{task_id}", headers=headers)
+
+    assert response.status_code == 200
+    assert "успешно удалена" in response.json()["message"]
+
+    # Author
     token = create_access_token({"sub": "benbridgerton@example.com"})
     headers = {"Authorization": f"Bearer {token}"}
     task_id = 40
@@ -335,6 +346,8 @@ async def test_delete_task(client, async_session):
 
     assert response.status_code == 404
     assert response.json()["error_code"] == "NOT_FOUND"
+
+    await add_tasks(async_session)
 
     # Not author
     task_id = 53

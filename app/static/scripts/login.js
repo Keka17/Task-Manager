@@ -9,7 +9,7 @@
         const submitBtn = document.getElementById('submitBtn');
         const loadingDiv = document.getElementById('loading');
 
-        // Сбрасываем сообщения
+        // Clear messages
         errorDiv.style.display = 'none';
         errorDiv.textContent = '';
         successDiv.style.display = 'none';
@@ -44,7 +44,7 @@
             } catch (parseError) {
                 console.error('Failed to parse JSON:', parseError);
 
-                // Если это HTML страница
+                // If an HTML page
                 if (responseText.includes('<html') || responseText.includes('<!DOCTYPE')) {
                     throw new Error('Server returned HTML instead of JSON. Check your endpoint.');
                 }
@@ -62,17 +62,16 @@
                         localStorage.setItem('refresh_token', data.refresh_token);
                     }
 
-                    // Показываем успешное сообщение
                     successDiv.style.display = 'block';
 
-                    // Сразу перенаправляем, без задержки
+                    // Redirect immediately
                     window.location.href = '/ws/enter';
 
                 } else {
                     throw new Error('No access token in response');
                 }
             } else {
-                // Обработка ошибок от сервера
+                // Server error handling
                 let errorMsg = 'Ошибка входа';
 
                 if (data.detail) {
@@ -96,7 +95,7 @@
         }
     });
 
-// Автоперенаправление если уже залогинен
+// Automatic redirection if already logged in
 document.addEventListener('DOMContentLoaded', () => {
     const token = localStorage.getItem('access_token');
     if (token) {

@@ -214,10 +214,14 @@ class TaskService:
         result = await session.execute(query)
         task_in_db = result.scalars().first()
 
+        # Permission check
+        is_author = current_user.email == task_in_db.user_email
+        is_admin = getattr(current_user, "is_superuser")
+
         if not task_in_db:
             raise TaskNotFoundException(task_id)
 
-        if current_user.email != task_in_db.user_email:
+        if not (is_author or is_admin):
             raise NotAuthorException()
 
         await session.delete(task_in_db)
