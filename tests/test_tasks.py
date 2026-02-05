@@ -189,7 +189,7 @@ async def test_update_tasks(client, async_session):
     token = create_access_token({"sub": "benbridgerton@example.com"})
     headers = {"Authorization": f"Bearer {token}"}
 
-    payload = {"content": "test"}
+    payload = {"content": "Test"}
 
     task_id = 40
 
@@ -198,7 +198,7 @@ async def test_update_tasks(client, async_session):
     assert response.status_code == 200
     assert response.json()["id"] == task_id
     assert response.json()["user_email"] == "benbridgerton@example.com"
-    assert "test" in response.json()["content"]
+    assert "UPD: Test" in response.json()["content"]
 
     non_exs_task_id = 66
 

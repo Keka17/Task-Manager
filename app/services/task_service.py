@@ -147,8 +147,10 @@ class TaskService:
         if task_in_db.user_email != current_user.email:
             raise NotAuthorException()
 
+        now_local = datetime.now(LOCAL_TZ).strftime("%Y-%m-%d %H:%M")
+
         if task_update.content:
-            task_in_db.content = task_update.content
+            task_in_db.content = f"{task_in_db.content}           📌 UPD: {now_local} | {task_update.content}"
 
         await session.commit()
         await session.refresh(task_in_db)
