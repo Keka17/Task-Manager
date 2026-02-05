@@ -91,5 +91,55 @@
 * `pytest.ini`: Конфигурационный файл для pytest.
 * `requirements.txt`: Список зависимостей проекта.
 
+## Установка и запуск
+### Локальный запуск
+   * __Требования__: перед запуском приложения убедитесь, что у вас установлены следующие компоненты:
+      * Python 3.10+
+      * PostgreSQL
+      * Redis
 
+   1. __Клонирование репозитория__
+      ```bash
+       git clone https://github.com/Keka17/Task-Manager
+
+       cd Task-Manager
+      ```
+   
+2. __Создание и активация виртуальной среды__
+   
+   ```bash
+      python3 -m venv venv
+
+      venv\Scripts\activate (Windows)
+
+      source venv/bin/activate (MacOS, Linux)
+   ```
+  
+3. __Установка зависимостей__
+   
+    ```bash
+      pip install -r requirements.txt
+    ```
+4. __Настройка переменных окружения__
+   
+   Для корректной работы приложения создайте файл `.env` в корне проекта, заполнив его в соответствии с файлом `.env.example`. Параметры `COMPANY_DOMAIN`, `POSITIONS` _необязательны_.
+
+5. __Запуск приложения__
+
+   Для полноценной работы нужно запустить три компонента:
+  * __API сервер__: из корневой папки
+    
+    ```bash
+    uvicorn app.main:app --reload
+    ```
+  * __Celery Worker__:
+    
+    ```bash
+    celery -A app.tasks.celery_app.celery_app worker --loglevel=info
+    ```
+  * __Celery Beat__:
+    
+    ```bash
+    celery -A app.tasks.celery_app.celery_app beat --loglevel=info
+    ```
 
