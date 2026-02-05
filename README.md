@@ -11,6 +11,7 @@
 
 ## Стек технологий
 * Backend: _FastAPI, Uvicorn, Pydantic v2_
+* Frontend: _JavaScript, CSS, HTML_
 * Database: _PostgreSQL, SQLAlchemy, Alembic_
 * Broker: _Redis_
 * Tasks: _Celery, Celery Beat_
