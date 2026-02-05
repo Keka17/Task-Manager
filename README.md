@@ -4,12 +4,22 @@
 
 
 ## Основной функционал
-1. Регистрация и аутентификация OAuth2 для доступа к функционалу приложения.
-2. СRUD-операции для работы с задачами.
-3. Асинхронное взаимодействие с PostgreSQL.
-4. Обновление статуса задач в режиме реального времени с использованием WebSocket.
+* Регистрация и аутентификация OAuth2 для доступа к функционалу приложения.
+* СRUD-операции для работы с задачами.
+* Асинхронное взаимодействие с PostgreSQL.
+* Обновление статуса задач в режиме реального времени с использованием WebSocket.
 
 ## Стек технологий
+* Backend: _FastAPI, Uvicorn, Pydantic v2_
+* Database: _PostgreSQL, SQLAlchemy, Alembic_
+* Broker: _Redis_
+* Tasks: _Celery, Celery Beat_
+* Security: _JWT (PyJWT), Passlib (bcrypt), Cryptography_
+* External services: _HTTPX, Requests, FastAPI-Mail_
+* Templates: _Jinja2_
+* Logging: _Loguru_
+* Testing: _Pytest, Pytest-Asyncio_
+* DevOps: _Docker, Docker Compose_
 
 
 ## Структура проекта
