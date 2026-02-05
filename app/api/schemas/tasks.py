@@ -24,19 +24,15 @@ class TaskCreate(TaskBase):
     @field_validator("title")
     @classmethod
     def check_title(cls, title: str) -> str:
-        if isinstance(title[0], str):
-            if not title[0].isupper():
-                raise ValueError("Заголовок должен начинаться с заглавной буквы!")
+        if title[0].isalpha() and not title[0].isupper():
+            raise ValueError("Заголовок должен начинаться с заглавной буквы!")
         return title
 
     @field_validator("content")
     @classmethod
     def check_content(cls, content: str) -> str:
-        if isinstance(content[0], str):
-            if not content[0].isupper():
-                raise ValueError(
-                    "Содержание задачи должно начинаться с заглавной буквы!"
-                )
+        if content[0].isalpha() and not content[0].isupper():
+            raise ValueError("Содержание задачи должно начинаться с заглавной буквы!")
         return content
 
     @field_validator("importance_level")
@@ -61,11 +57,8 @@ class TaskUpdate(BaseModel):
     @field_validator("content")
     @classmethod
     def check_content(cls, content: Optional[str]) -> Optional[str]:
-        if content and isinstance(content[0], str):
-            if not content[0].isupper():
-                raise ValueError(
-                    "Дополнение к задаче должно начинаться с заглавной буквы!"
-                )
+        if content[0].isalpha() and not content[0].isupper():
+            raise ValueError("Дополнение к задаче должно начинаться с заглавной буквы!")
         return content
 
 
