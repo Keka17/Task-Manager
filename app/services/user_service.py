@@ -1,6 +1,7 @@
 import bcrypt
 from sqlalchemy import select, or_
 from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi_babel import _
 
 from app.db.models import User as UserModel
 from app.exceptions.users import (
@@ -76,4 +77,7 @@ class UserService:
         await session.delete(user_in_db)
         await session.commit()
 
-        return {"message": f"Пользователь с id = {user_id} успешно удален."}
+        return {
+            "message": _("Пользователь с id = %(user_id)d успешно удален.")
+            % {"user_id": user_id}
+        }

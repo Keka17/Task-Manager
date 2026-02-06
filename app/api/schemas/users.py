@@ -1,5 +1,6 @@
-from pydantic import BaseModel, field_validator, EmailStr, ConfigDict, ValidationInfo
+from pydantic import BaseModel, field_validator, EmailStr, ConfigDict
 import re
+from fastapi_babel import _
 from app.core.config import get_settings
 
 settings = get_settings()
@@ -24,7 +25,7 @@ class UserCreate(UserBase):
             allowed_positions = ", ".join(positions_list)
             if position not in positions_list:
                 raise ValueError(
-                    f"Позиции не существует. Доступные позиции:\n{allowed_positions}"
+                    _(f"Позиции не существует. Доступные позиции:\n{allowed_positions}")
                 )
 
         return position
@@ -38,7 +39,7 @@ class UserCreate(UserBase):
         if allowed_domain:
             if not email.lower().endswith(f"@{allowed_domain}"):
                 raise ValueError(
-                    f"Регистрация доступна только для сотрудников: @{allowed_domain}"
+                    _(f"Регистрация доступна только для сотрудников: @{allowed_domain}")
                 )
 
         return email.lower()
@@ -54,9 +55,11 @@ class UserCreate(UserBase):
             return password
         else:
             raise ValueError(
-                "Слабый пароль! Рекомендации по созданию надежного пароля:"
-                "минимальная длина - 12 символов, буквы верхнего и нижнего регистра,"
-                "как минимум одна цифра и специальные символы (@$!%*?&)"
+                _(
+                    "Слабый пароль! Рекомендации по созданию надежного пароля:"
+                    "минимальная длина - 12 символов, буквы верхнего и нижнего регистра,"
+                    "как минимум одна цифра и специальные символы (@$!%*?&)"
+                )
             )
 
     @field_validator("phone")
@@ -69,7 +72,9 @@ class UserCreate(UserBase):
             return phone
         else:
             raise ValueError(
-                "Некорректная запись! Номер телефона должен начинаться с 8 и состоять из 11 цифр."
+                _(
+                    "Некорректная запись! Номер телефона должен начинаться с 8 и состоять из 11 цифр."
+                )
             )
 
 

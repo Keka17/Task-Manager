@@ -27,13 +27,10 @@ async def signup(user: UserCreate, session: AsyncSession = Depends(get_db_connec
 
 
 @router.get("/", response_model=list[UserSchema])
-async def get_users(
-    session: AsyncSession = Depends(get_db_connection),
-    admin: UserModel = Depends(admin_required),
-):
+async def get_users(session: AsyncSession = Depends(get_db_connection)):
     """
     Extracts all users from the database.
-    Only available to users with administrative privileges only.
+    Only available with a valid Access Token in the Authorization header.
     """
     return await UserService.get_users(session)
 
@@ -42,11 +39,10 @@ async def get_users(
 async def get_user(
     user_id: int,
     session: AsyncSession = Depends(get_db_connection),
-    admin: UserModel = Depends(admin_required),
 ):
     """
     Returns a user by their id.
-    Only available to users with administrative privileges only.
+    Only available with a valid Access Token in the Authorization header.
     """
     return await UserService.get_user_by_id(user_id, session)
 
@@ -59,6 +55,6 @@ async def delete_user(
 ):
     """
     Deletes a user by their ID.
-    Only available to users with administrative privileges only.
+    Only available to users with administrative privileges.
     """
     return await UserService.delete_user_by_id(user_id, session)

@@ -1,7 +1,7 @@
 from asgiref.sync import async_to_sync
 from celery import shared_task
-from certifi import where
 from sqlalchemy import select
+from fastapi_babel import _
 from zoneinfo import ZoneInfo
 from datetime import datetime
 from app.db.database import AsyncSessionLocal
@@ -35,11 +35,18 @@ async def uncompleted_task_email():
             tasks = result.scalars().all()
 
             for task in tasks:
+                # If local language = ru
                 await send_async_email(
                     task,
                     "Уведомление о задаче наивысшего приоритета",
-                    "task_notification.html",
+                    "ru/task_notification.html",
                 )
+                # If local language = en
+                # await send_async_email(
+                #     task,
+                #     "Highest priority task notification",
+                #     "en/task_notification.html",
+                # )
         except Exception as e:
             await session.rollback()
             print(f"Error during sending: {e}")
@@ -63,11 +70,18 @@ async def delayed_task_email():
             tasks = result.scalars().all()
 
             for task in tasks:
+                # If local language = ru
                 await send_async_email(
                     task,
                     "Уведомление о задаче наивысшего приоритета",
-                    "delay_notification.html",
+                    "ru/delay_notification.html",
                 )
+                # If local language = en
+                # await send_async_email(
+                #     task,
+                #     "Highest priority task notification",
+                #     "en/delay_notification.html",
+                # )
                 task.overdue_notified = True
 
             await session.commit()

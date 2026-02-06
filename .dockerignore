@@ -39,3 +39,6 @@ tests/
 
 # OS / misc
 Thumbs.db
+
+*.mo
+*.pot

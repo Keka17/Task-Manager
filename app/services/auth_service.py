@@ -2,6 +2,7 @@ import bcrypt
 import datetime
 import jwt
 from jwt import PyJWTError
+from fastapi_babel import _
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -115,4 +116,4 @@ class AuthService:
         except:
             raise InvalidTokenException()
 
-        return {"message": "Выход из системы выполнен успешно."}
+        return {"message": _("Выход из системы выполнен успешно.")}

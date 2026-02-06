@@ -1,0 +1,141 @@
+# English translations for PROJECT.
+# Copyright (C) 2026 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2026-02-06 17:22+0300\n"
+"PO-Revision-Date: 2026-02-06 17:23+0300\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: en\n"
+"Language-Team: en <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: app/api/endpoints/tasks.py:148
+#, python-format
+msgid "Задача '%(title)s' завершена."
+msgstr "Task '%(title)s' completed."
+
+#: app/api/endpoints/tasks.py:186
+#, python-format
+msgid "Задача '%(title)s' успешно удалена."
+msgstr "Task '%(title)s' successfully deleted."
+
+#: app/api/schemas/tasks.py:29
+msgid "Заголовок должен начинаться с заглавной буквы!"
+msgstr "The title must begin with a capital letter!"
+
+#: app/api/schemas/tasks.py:36
+msgid "Содержание задачи должно начинаться с заглавной буквы!"
+msgstr "The content of the task must begin with a capital letter!"
+
+#: app/api/schemas/tasks.py:45
+msgid ""
+"Некорректная запись уровня важности.\n"
+"Возможные уровни:\n"
+"🔴 A - Важно и срочно\n"
+"🟢 B - Важно и не срочно\n"
+"🟡 C - Не важно и срочно\n"
+"🟣 D - Не срочно и не важно"
+msgstr "Incorrect importance level.\nLevel:\n🔴 A - Important and urgent\n🟢 B - Important and not urgent\n🟡 C - Not important and urgent\n🟣 D - Not important and not urgent"
+
+#: app/api/schemas/tasks.py:62
+msgid "Дополнение к задаче должно начинаться с заглавной буквы!"
+msgstr "The addition to the task must begin with a capital letter!"
+
+#: app/api/schemas/users.py:58
+msgid ""
+"Слабый пароль! Рекомендации по созданию надежного пароля:минимальная "
+"длина - 12 символов, буквы верхнего и нижнего регистра,как минимум одна "
+"цифра и специальные символы (@$!%*?&)"
+msgstr ""
+"Weak password! Recommendations for creating a strong password:minimum "
+"length is 12 characters, upper and lower case letters, at least one"
+"number, and special characters (@$!%*?&)"
+
+#: app/api/schemas/users.py:73
+msgid ""
+"Некорректная запись! Номер телефона должен начинаться с 8 и состоять из "
+"11 цифр."
+msgstr "Incorrect entry! The phone number must start with 8 and consist of 11 digits."
+
+#: app/exceptions/tasks.py:9
+#, python-format
+msgid "Задача %(task_id)d не найдена."
+msgstr "The task %(task_id)d not found."
+
+#: app/exceptions/tasks.py:18
+msgid "Доступ запрещен: действие разрешено только автору."
+msgstr "Access denied: action permitted only to the author."
+
+#: app/exceptions/tasks.py:27
+msgid ""
+"Некорректная запись уровня важности.Возможные уровни: A - Важно и срочно,"
+" B - Важно и не срочно, C - Не важно и срочно, D - Не срочно и не важно."
+msgstr ""
+"Incorrect importance level entry. Levels: A - Important and urgent,"
+" B - Important and not urgent, C - Not important and urgent, D - Not urgent and not important."
+
+#: app/exceptions/tasks.py:40
+msgid "Задача уже решена."
+msgstr "The task has already been completed."
+
+#: app/exceptions/tokens.py:8
+msgid "Время жизни токена истекло."
+msgstr "The token has expired."
+
+#: app/exceptions/tokens.py:16
+msgid "Невалидный токен."
+msgstr "Invalid token."
+
+#: app/exceptions/tokens.py:24
+#, python-format
+msgid "Невалидный тип токена. Ожидается: %(expected_type)s."
+msgstr "Invalid token type. Expected: %(expected_type)s."
+
+#: app/exceptions/tokens.py:33
+msgid "Токен аннулирован."
+msgstr "The token has been revoked."
+
+#: app/exceptions/users.py:8
+msgid "Пользователь не найден."
+msgstr "User not found."
+
+#: app/exceptions/users.py:15
+#, python-format
+msgid "Почта %(email)s занята."
+msgstr "%(email)s is in use."
+
+#: app/exceptions/users.py:22
+#, python-format
+msgid "Номер %(phone)s занят."
+msgstr "%(phone)s is in use."
+
+#: app/exceptions/users.py:30
+msgid "Неверные учетные данные."
+msgstr "Invalid credentials."
+
+#: app/exceptions/users.py:39
+msgid "Запрещено: требуется доступ администратора."
+msgstr "Not allowed: admin access needed."
+
+#: app/exceptions/users.py:47
+msgid "Вы не авторизованы."
+msgstr "You are not authorized."
+
+#: app/services/auth_service.py:119
+msgid "Выход из системы выполнен успешно."
+msgstr "You have successfully logged out."
+
+#: app/services/user_service.py:80
+#, python-format
+msgid "Пользователь с id = %(user_id)d успешно удален."
+msgstr "The user with id = %(user_id)d has been successfully deleted."
+

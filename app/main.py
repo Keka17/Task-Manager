@@ -1,9 +1,11 @@
 from loguru import logger
 import sys
+from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
 from fastapi.staticfiles import StaticFiles
+from fastapi_babel import Babel, BabelConfigs, BabelMiddleware
 
 from app.api.endpoints import users, auth, tasks
 from app.api import websocket_board
@@ -52,9 +54,20 @@ logger.add(
 
 app = FastAPI()
 
+
+babel_configs = BabelConfigs(
+    ROOT_DIR=Path(__file__).resolve().parent,
+    BABEL_DEFAULT_LOCALE="ru",
+    BABEL_TRANSLATION_DIRECTORY="locales",
+)
+
+babel = Babel(configs=babel_configs)
+
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
+app.add_middleware(BabelMiddleware, babel_configs=babel_configs)
 app.middleware("http")(loguru_middleware)
+
 app.add_exception_handler(AppException, app_exception_handler)
 app.add_exception_handler(RequestValidationError, validation_exception_handler)
 

@@ -15,3 +15,7 @@ alembic/__pycache__/
 *.pyc
 
 celerybeat-schedule.db
+
+# Translations
+*.mo
+*.pot

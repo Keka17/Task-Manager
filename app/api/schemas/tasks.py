@@ -8,6 +8,7 @@ from pydantic import (
 from datetime import datetime
 from typing import Optional, Annotated
 from zoneinfo import ZoneInfo
+from fastapi_babel import _
 
 from app.core.config import get_settings
 
@@ -25,14 +26,16 @@ class TaskCreate(TaskBase):
     @classmethod
     def check_title(cls, title: str) -> str:
         if title[0].isalpha() and not title[0].isupper():
-            raise ValueError("Заголовок должен начинаться с заглавной буквы!")
+            raise ValueError(_("Заголовок должен начинаться с заглавной буквы!"))
         return title
 
     @field_validator("content")
     @classmethod
     def check_content(cls, content: str) -> str:
         if content[0].isalpha() and not content[0].isupper():
-            raise ValueError("Содержание задачи должно начинаться с заглавной буквы!")
+            raise ValueError(
+                _("Содержание задачи должно начинаться с заглавной буквы!")
+            )
         return content
 
     @field_validator("importance_level")
@@ -41,25 +44,20 @@ class TaskCreate(TaskBase):
         levels = ["A", "B", "C", "D"]
         if level not in levels:
             raise ValueError(
-                "Некорректная запись уровня важности."
-                "\nВозможные уровни:"
-                "\n🔴 A - Важно и срочно"
-                "\n🟢 B - Важно и не срочно"
-                "\n🟡 C - Не важно и срочно"
-                "\n🟣 D - Не срочно и не важно"
+                _(
+                    "Некорректная запись уровня важности."
+                    "\nВозможные уровни:"
+                    "\n🔴 A - Важно и срочно"
+                    "\n🟢 B - Важно и не срочно"
+                    "\n🟡 C - Не важно и срочно"
+                    "\n🟣 D - Не срочно и не важно"
+                )
             )
         return level
 
 
 class TaskUpdate(BaseModel):
     content: Optional[str] = None
-
-    @field_validator("content")
-    @classmethod
-    def check_content(cls, content: Optional[str]) -> Optional[str]:
-        if content[0].isalpha() and not content[0].isupper():
-            raise ValueError("Дополнение к задаче должно начинаться с заглавной буквы!")
-        return content
 
 
 class TaskUpdateAdmin(BaseModel):

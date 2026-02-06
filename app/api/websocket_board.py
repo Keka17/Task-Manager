@@ -38,4 +38,5 @@ async def websocket_endpoint(
 async def board_page(
     request: Request,
 ):
+    """Displays a task board page."""
     return templates.TemplateResponse("board.html", {"request": request})

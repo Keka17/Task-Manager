@@ -2,6 +2,7 @@ from datetime import datetime, timezone, timedelta
 from zoneinfo import ZoneInfo
 
 from fastapi import BackgroundTasks
+from fastapi_babel import _
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
@@ -32,6 +33,7 @@ class TaskService:
     @staticmethod
     async def create_task(
         task_data: TaskCreate,
+        accept_language: str,
         current_user: UserModel,
         session: AsyncSession,
         background_tasks: BackgroundTasks,
@@ -65,12 +67,20 @@ class TaskService:
         await session.refresh(new_task)
 
         if new_task.importance_level == "A":
-            background_tasks.add_task(
-                send_async_email,
-                new_task,
-                "Уведомление о задаче наивысшего приоритета",
-                "task_notification.html",
-            )
+            if accept_language == "en":
+                background_tasks.add_task(
+                    send_async_email,
+                    new_task,
+                    "Highest priority task notification",
+                    "en/task_notification.html",
+                )
+            else:
+                background_tasks.add_task(
+                    send_async_email,
+                    new_task,
+                    "Уведомление о задаче наивысшего приоритета",
+                    "ru/task_notification.html",
+                )
 
         return new_task
 
@@ -185,6 +195,7 @@ class TaskService:
     async def create_remark(
         task_id: int,
         task_remark,
+        accept_language: str,
         session: AsyncSession,
         background_tasks: BackgroundTasks,
     ):
@@ -201,12 +212,20 @@ class TaskService:
         await session.commit()
         await session.refresh(task)
 
-        background_tasks.add_task(
-            send_async_email,
-            task,
-            "Уведомление о задаче: комментарий администратора",
-            "remark_notification.html",
-        )
+        if accept_language == "en":
+            background_tasks.add_task(
+                send_async_email,
+                task,
+                "Task notification: admin's comment",
+                "en/remark_notification.html",
+            )
+        else:
+            background_tasks.add_task(
+                send_async_email,
+                task,
+                "Уведомление о задаче: комментарий администратора",
+                "ru/remark_notification.html",
+            )
 
         return task
 
