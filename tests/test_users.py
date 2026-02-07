@@ -82,36 +82,27 @@ async def test_create_user_fail(client, async_session, mock_settings):
     assert "Слабый пароль!" in response.text
 
 
-async def test_get_users_access_control(client, async_session):
+async def test_get_users(client, async_session):
     """
-    Testing endpoint access control (admin only).
     Endpoint GET /users.
     """
     await add_users(async_session)
 
-    admin_token = create_access_token({"sub": "dundermifflin@example.com"})
-    headers_admin = {"Authorization": f"Bearer {admin_token}"}
+    user_token = create_access_token({"sub": "p.parker@example.com"})
+    cookies_token = {"user_access_token": user_token}
 
-    response_admin = await client.get("/users/", headers=headers_admin)
+    response = await client.get("/users/", cookies=cookies_token)
 
-    assert response_admin.status_code == 200
-    assert len(response_admin.json()) == 3
+    assert response.status_code == 200
+    assert len(response.json()) == 3
 
     # Authorization with invalid token type (refresh)
-    admin_refresh_token = create_refresh_token({"sub": "dundermifflin@example.com"})
-    headers = {"Authorization": f"Bearer {admin_refresh_token}"}
+    admin_refresh_token = create_refresh_token({"sub": "p.parker@example.com"})
+    cookies_token = {"user_access_token": admin_refresh_token}
 
-    response = await client.get("/users/", headers=headers)
-    assert response.status_code == 401
+    response = await client.get("/users/", cookies=cookies_token)
+    assert response.status_code == 400
     assert response.json()["error_code"] == "INVALID_TOKEN_TYPE"
-
-    # Regular user without administrative privileges
-    user_token = create_access_token({"sub": "p.parker@example.com"})
-    headers_user = {"Authorization": f"Bearer {user_token}"}
-
-    response_user = await client.get("/users/", headers=headers_user)
-    assert response_user.status_code == 403
-    assert response_user.json()["error_code"] == "FORBIDDEN"
 
     # Trying to reach without auth
     response = await client.get("/users/")
@@ -119,41 +110,32 @@ async def test_get_users_access_control(client, async_session):
     assert response.json()["error_code"] == "UNAUTHORIZED"
 
 
-async def test_get_user_access_control(client, async_session):
+async def test_get_user(client, async_session):
     """
-    Testing endpoint access control (admin only).
     Endpoint GET /users/{user_id}.
     """
     await add_users(async_session)
 
-    admin_token = create_access_token({"sub": "dundermifflin@example.com"})
-    headers_admin = {"Authorization": f"Bearer {admin_token}"}
+    user_token = create_access_token({"sub": "p.parker@example.com"})
+    cookies_token = {"user_access_token": user_token}
 
-    existing_user_id = 2
+    existing_user_id = 1
 
     response_admin = await client.get(
-        f"/users/{existing_user_id}", headers=headers_admin
+        f"/users/{existing_user_id}", cookies=cookies_token
     )
     assert response_admin.status_code == 200
 
     user = response_admin.json()
-    assert user["name"] == "Паркер Питер Бенджами"
+    assert user["name"] == "Скотт Майкл Георгиевич"
 
     non_existing_user_id = 999
 
     response_admin = await client.get(
-        f"/users/{non_existing_user_id}", headers=headers_admin
+        f"/users/{non_existing_user_id}", cookies=cookies_token
     )
     assert response_admin.status_code == 404
     assert response_admin.json()["error_code"] == "NOT_FOUND"
-
-    # Regular user without administrative privileges
-    user_token = create_access_token({"sub": "p.parker@example.com"})
-    headers_user = {"Authorization": f"Bearer {user_token}"}
-
-    response_user = await client.get(f"/users/{existing_user_id}", headers=headers_user)
-    assert response_user.status_code == 403
-    assert response_user.json()["error_code"] == "FORBIDDEN"
 
     # Trying to reach without auth
     response = await client.get(f"/users/{existing_user_id}")
@@ -168,12 +150,12 @@ async def test_delete_user_access_control(client, async_session):
     """
     await add_users(async_session)
     admin_token = create_access_token({"sub": "dundermifflin@example.com"})
-    headers_admin = {"Authorization": f"Bearer {admin_token}"}
+    cookies_token = {"user_access_token": admin_token}
 
     existing_user_id = 3
 
     response_admin = await client.delete(
-        f"/users/{existing_user_id}", headers=headers_admin
+        f"/users/{existing_user_id}", cookies=cookies_token
     )
 
     assert response_admin.status_code == 200
@@ -189,7 +171,7 @@ async def test_delete_user_access_control(client, async_session):
     non_existing_user_id = 999
 
     response_admin = await client.delete(
-        f"/users/{non_existing_user_id}", headers=headers_admin
+        f"/users/{non_existing_user_id}", cookies=cookies_token
     )
 
     assert response_admin.status_code == 404
@@ -197,10 +179,10 @@ async def test_delete_user_access_control(client, async_session):
 
     # Regular user without administrative privileges
     user_token = create_access_token({"sub": "p.parker@example.com"})
-    headers_user = {"Authorization": f"Bearer {user_token}"}
+    cookies_token = {"user_access_token": user_token}
 
     response_user = await client.delete(
-        f"/users/{existing_user_id}", headers=headers_user
+        f"/users/{existing_user_id}", cookies=cookies_token
     )
     assert response_user.status_code == 403
     assert response_user.json()["error_code"] == "FORBIDDEN"

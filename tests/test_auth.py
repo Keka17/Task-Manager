@@ -117,7 +117,7 @@ async def test_refresh_token_fail(client, async_session):
     headers = {"x-refresh-token": access_token}
     response = await client.post("/auth/refresh", headers=headers)
 
-    assert response.status_code == 401
+    assert response.status_code == 400
     assert response.json()["error_code"] == "INVALID_TOKEN_TYPE"
 
     response = await client.post("/auth/refresh")

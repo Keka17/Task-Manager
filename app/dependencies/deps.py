@@ -4,7 +4,7 @@ from fastapi import WebSocket, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
-from app.core.security import decode_jwt_token
+from app.core.security import decode_jwt_token_cookie
 from app.exceptions.users import (
     UserNotFoundException,
     AdminAccessRequired,
@@ -28,7 +28,7 @@ async def get_current_user_cookie(
     session: AsyncSession = Depends(get_db_connection),
     token: str = Depends(get_token_cookie),
 ) -> UserModel:
-    payload = decode_jwt_token(token)
+    payload = decode_jwt_token_cookie(token)
 
     if payload.get("token_type") != "access":
         raise InvalidTokenTypeException(expected_type="access")
@@ -71,7 +71,7 @@ async def get_current_user_ws(websocket: WebSocket) -> dict:
         raise ValueError("Missing token")
 
     try:
-        payload = decode_jwt_token(token=token)
+        payload = decode_jwt_token_cookie(token=token)
         return payload
     except jwt.ExpiredSignatureError:
         await websocket.close(code=4001)

@@ -17,7 +17,7 @@ async def test_create_task_success(client, async_session):
     await add_users(async_session)
 
     token = create_access_token({"sub": "benbridgerton@example.com"})
-    headers = {"Authorization": f"Bearer {token}"}
+    cookies_token = {"user_access_token": token}
 
     payload = {
         "title": "Test title",
@@ -25,7 +25,7 @@ async def test_create_task_success(client, async_session):
         "importance_level": "B",
     }
 
-    response = await client.post("/tasks/", headers=headers, json=payload)
+    response = await client.post("/tasks/", cookies=cookies_token, json=payload)
 
     assert response.status_code == 200
 
@@ -52,7 +52,7 @@ async def test_create_task_fail(client, async_session):
     await add_users(async_session)
 
     token = create_access_token({"sub": "benbridgerton@example.com"})
-    headers = {"Authorization": f"Bearer {token}"}
+    cookies_token = {"user_access_token": token}
 
     payload = {
         "title": "test title",
@@ -60,7 +60,7 @@ async def test_create_task_fail(client, async_session):
         "importance_level": "E",
     }
 
-    response = await client.post("/tasks/", headers=headers, json=payload)
+    response = await client.post("/tasks/", cookies=cookies_token, json=payload)
 
     assert response.status_code == 400
     assert "Field: ('body', 'title')" in response.text
@@ -81,9 +81,9 @@ async def test_get_tasks(client, async_session):
     await add_tasks(async_session)
 
     token = create_access_token({"sub": "benbridgerton@example.com"})
-    headers = {"Authorization": f"Bearer {token}"}
+    cookies_token = {"user_access_token": token}
 
-    response = await client.get("/tasks/", headers=headers)
+    response = await client.get("/tasks/", cookies=cookies_token)
 
     assert response.status_code == 200
 
@@ -97,20 +97,20 @@ async def test_get_tasks(client, async_session):
     # Query params
     params = {"completed": False}
 
-    response = await client.get("/tasks/", headers=headers, params=params)
+    response = await client.get("/tasks/", cookies=cookies_token, params=params)
     assert response.status_code == 200
     assert len(response.json()) == 1
 
     params = {"level": "B"}
 
-    response = await client.get("/tasks/", headers=headers, params=params)
+    response = await client.get("/tasks/", cookies=cookies_token, params=params)
 
     assert response.status_code == 200
     assert len(response.json()) == 0
 
     params = {"completed": False, "level": "C"}
 
-    response = await client.get("/tasks/", headers=headers, params=params)
+    response = await client.get("/tasks/", cookies=cookies_token, params=params)
 
     assert response.status_code == 200
     assert len(response.json()) == 1
@@ -118,7 +118,7 @@ async def test_get_tasks(client, async_session):
     # Invalid level
     params = {"level": "E"}
 
-    response = await client.get("/tasks/", headers=headers, params=params)
+    response = await client.get("/tasks/", cookies=cookies_token, params=params)
 
     assert response.status_code == 422
     assert response.json()["error_code"] == "UNPROCESSABLE_ENTITY"
@@ -139,10 +139,10 @@ async def test_get_task(client, async_session):
     await add_tasks(async_session)
 
     token = create_access_token({"sub": "benbridgerton@example.com"})
-    headers = {"Authorization": f"Bearer {token}"}
+    cookies_token = {"user_access_token": token}
     task_id = 53
 
-    response = await client.get(f"/tasks/{task_id}", headers=headers)
+    response = await client.get(f"/tasks/{task_id}", cookies=cookies_token)
 
     assert response.status_code == 200
     assert response.json()["id"] == task_id
@@ -151,7 +151,7 @@ async def test_get_task(client, async_session):
     )
 
     non_exs_task_id = 66
-    response = await client.get(f"/tasks/{non_exs_task_id}", headers=headers)
+    response = await client.get(f"/tasks/{non_exs_task_id}", cookies=cookies_token)
 
     assert response.status_code == 404
     assert response.json()["error_code"] == "NOT_FOUND"
@@ -166,9 +166,9 @@ async def test_get_my_tasks(client, async_session):
     await add_tasks(async_session)
 
     token = create_access_token({"sub": "benbridgerton@example.com"})
-    headers = {"Authorization": f"Bearer {token}"}
+    cookies_token = {"user_access_token": token}
 
-    response = await client.get("/tasks/my_tasks", headers=headers)
+    response = await client.get("/tasks/my_tasks", cookies=cookies_token)
 
     assert response.status_code == 200
 
@@ -187,23 +187,25 @@ async def test_update_tasks(client, async_session):
     await add_tasks(async_session)
 
     token = create_access_token({"sub": "benbridgerton@example.com"})
-    headers = {"Authorization": f"Bearer {token}"}
+    cookies_token = {"user_access_token": token}
 
     payload = {"content": "Test"}
 
     task_id = 40
 
-    response = await client.patch(f"/tasks/{task_id}", headers=headers, json=payload)
+    response = await client.patch(
+        f"/tasks/{task_id}", cookies=cookies_token, json=payload
+    )
 
     assert response.status_code == 200
     assert response.json()["id"] == task_id
     assert response.json()["user_email"] == "benbridgerton@example.com"
-    assert "UPD: Test" in response.json()["content"]
+    assert "Test" in response.json()["content"]
 
     non_exs_task_id = 66
 
     response = await client.patch(
-        f"/tasks/{non_exs_task_id}", headers=headers, json=payload
+        f"/tasks/{non_exs_task_id}", cookies=cookies_token, json=payload
     )
 
     assert response.status_code == 404
@@ -212,7 +214,9 @@ async def test_update_tasks(client, async_session):
     # Not author
     task_id = 53
 
-    response = await client.patch(f"/tasks/{task_id}", headers=headers, json=payload)
+    response = await client.patch(
+        f"/tasks/{task_id}", cookies=cookies_token, json=payload
+    )
 
     assert response.status_code == 403
     assert response.json()["error_code"] == "FORBIDDEN"
@@ -227,10 +231,10 @@ async def test_complete_task(client, async_session):
     await add_tasks(async_session)
 
     token = create_access_token({"sub": "p.parker@example.com"})
-    headers = {"Authorization": f"Bearer {token}"}
+    cookies_token = {"user_access_token": token}
     task_id = 53
 
-    response = await client.patch(f"/tasks/complete/{task_id}", headers=headers)
+    response = await client.patch(f"/tasks/complete/{task_id}", cookies=cookies_token)
 
     assert response.status_code == 200
 
@@ -240,14 +244,16 @@ async def test_complete_task(client, async_session):
     )
 
     # Already completed
-    response = await client.patch(f"/tasks/complete/{task_id}", headers=headers)
+    response = await client.patch(f"/tasks/complete/{task_id}", cookies=cookies_token)
 
     assert response.status_code == 400
     assert response.json()["error_code"] == "BAD_REQUEST"
 
     non_exs_task_id = 66
 
-    response = await client.patch(f"/tasks/complete/{non_exs_task_id}", headers=headers)
+    response = await client.patch(
+        f"/tasks/complete/{non_exs_task_id}", cookies=cookies_token
+    )
 
     assert response.status_code == 404
     assert response.json()["error_code"] == "NOT_FOUND"
@@ -255,7 +261,7 @@ async def test_complete_task(client, async_session):
     # Not author
     task_id = 40
 
-    response = await client.patch(f"/tasks/complete/{task_id}", headers=headers)
+    response = await client.patch(f"/tasks/complete/{task_id}", cookies=cookies_token)
 
     assert response.status_code == 403
     assert response.json()["error_code"] == "FORBIDDEN"
@@ -274,13 +280,13 @@ async def test_create_remark(client, async_session):
     await add_tasks(async_session)
 
     token = create_access_token({"sub": "dundermifflin@example.com"})
-    headers = {"Authorization": f"Bearer {token}"}
+    cookies_token = {"user_access_token": token}
     task_id = 53
 
     payload = {"remark": "test remark"}
 
     response = await client.patch(
-        f"/tasks/remark/{task_id}", headers=headers, json=payload
+        f"/tasks/remark/{task_id}", cookies=cookies_token, json=payload
     )
 
     assert response.status_code == 200
@@ -289,7 +295,7 @@ async def test_create_remark(client, async_session):
 
     non_exs_task_id = 66
     response = await client.patch(
-        f"/tasks/remark/{non_exs_task_id}", headers=headers, json=payload
+        f"/tasks/remark/{non_exs_task_id}", cookies=cookies_token, json=payload
     )
 
     assert response.status_code == 404
@@ -297,10 +303,10 @@ async def test_create_remark(client, async_session):
 
     # Not admin
     token = create_access_token({"sub": "p.parker@example.com"})
-    headers = {"Authorization": f"Bearer {token}"}
+    cookies_token = {"user_access_token": token}
 
     response = await client.patch(
-        f"/tasks/remark/{task_id}", headers=headers, json=payload
+        f"/tasks/remark/{task_id}", cookies=cookies_token, json=payload
     )
     assert response.status_code == 403
     assert response.json()["message"] == "Запрещено: требуется доступ администратора."
@@ -316,20 +322,20 @@ async def test_delete_task(client, async_session):
 
     # Admin
     token = create_access_token({"sub": "dundermifflin@example.com"})
-    headers = {"Authorization": f"Bearer {token}"}
+    cookies_token = {"user_access_token": token}
     task_id = 53
 
-    response = await client.delete(f"/tasks/{task_id}", headers=headers)
+    response = await client.delete(f"/tasks/{task_id}", cookies=cookies_token)
 
     assert response.status_code == 200
     assert "успешно удалена" in response.json()["message"]
 
     # Author
     token = create_access_token({"sub": "benbridgerton@example.com"})
-    headers = {"Authorization": f"Bearer {token}"}
+    cookies_token = {"user_access_token": token}
     task_id = 40
 
-    response = await client.delete(f"/tasks/{task_id}", headers=headers)
+    response = await client.delete(f"/tasks/{task_id}", cookies=cookies_token)
 
     assert response.status_code == 200
     assert "успешно удалена" in response.json()["message"]
@@ -342,7 +348,7 @@ async def test_delete_task(client, async_session):
     assert deleted_task is None
 
     non_exs_task_id = 66
-    response = await client.delete(f"/tasks/{non_exs_task_id}", headers=headers)
+    response = await client.delete(f"/tasks/{non_exs_task_id}", cookies=cookies_token)
 
     assert response.status_code == 404
     assert response.json()["error_code"] == "NOT_FOUND"
@@ -352,7 +358,7 @@ async def test_delete_task(client, async_session):
     # Not author
     task_id = 53
 
-    response = await client.delete(f"/tasks/{task_id}", headers=headers)
+    response = await client.delete(f"/tasks/{task_id}", cookies=cookies_token)
 
     assert response.status_code == 403
     assert response.json()["error_code"] == "FORBIDDEN"

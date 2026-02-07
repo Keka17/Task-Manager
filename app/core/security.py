@@ -11,8 +11,6 @@ from app.core.config import get_settings
 
 settings = get_settings()
 
-# Extracts the token from the Authorization header
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login", auto_error=False)
 
 SECRET_KEY = settings.SECRET_KEY
 ALGORITHM = settings.ALGORITHM
@@ -53,22 +51,6 @@ def create_refresh_token(data: dict) -> str:
     return create_jwt_token(
         data, timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS), "refresh", include_jti=True
     )
-
-
-def decode_jwt_token(token: str = Depends(oauth2_scheme)) -> dict:
-    """
-    Extracts user information from the access token.
-    """
-    if not token:
-        raise UnauthorizedException()
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        return payload
-    except jwt.exceptions.ExpiredSignatureError:
-        raise TokenExpiredException()
-    except jwt.exceptions.InvalidTokenError as e:
-        print(f"JWT Error: {e}")
-        raise InvalidTokenException()
 
 
 def decode_jwt_token_cookie(token: str) -> dict:

@@ -126,6 +126,4 @@ async def logout(
     retrieves the JTI from the current token and adds it to the database.
     """
     result = await AuthService.logout(x_refresh_token, session)
-    response.delete_cookie(key="users_access_token")
-
     return result
