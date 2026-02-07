@@ -9,6 +9,7 @@ from app.exceptions.users import (
     UserNotFoundException,
     AdminAccessRequired,
     UnauthorizedException,
+    NotVerifiedException,
 )
 from app.exceptions.tokens import InvalidTokenTypeException
 from app.db.models import User as UserModel
@@ -41,6 +42,9 @@ async def get_current_user_cookie(
 
     if not user_in_db:
         raise UserNotFoundException()
+
+    if not user_in_db.is_verified:
+        raise NotVerifiedException()
 
     return user_in_db
 

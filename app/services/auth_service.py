@@ -8,7 +8,11 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models import RevokedToken, User as UserModel
-from app.exceptions.users import UserNotFoundException, InvalidCredentialsException
+from app.exceptions.users import (
+    UserNotFoundException,
+    InvalidCredentialsException,
+    NotVerifiedException,
+)
 from app.exceptions.tokens import (
     InvalidTokenException,
     InvalidTokenTypeException,
@@ -37,6 +41,9 @@ class AuthService:
 
         if not user_in_db:
             raise UserNotFoundException()
+
+        if not user_in_db.is_verified:
+            raise NotVerifiedException()
 
         if not bcrypt.checkpw(
             user_in.password.encode("utf-8"), user_in_db.hashed_password.encode("utf-8")

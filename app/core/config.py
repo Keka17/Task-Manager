@@ -21,6 +21,8 @@ class Settings(BaseSettings):
     MAIL_SERVER: str = "smtp.mail.ru"
     MAIL_FROM_NAME: str = "TaskManager API"
 
+    FRONTEND_URL: str = "http://127.0.0.1:8000"
+
     # Redis
     REDIS_URL: str = "redis://localhost:6379/0"
 

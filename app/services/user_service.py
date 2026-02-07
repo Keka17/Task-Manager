@@ -1,20 +1,37 @@
 import bcrypt
 from dns.e164 import query
-from sqlalchemy import select, or_
+from itsdangerous import URLSafeTimedSerializer, BadSignature
+from sqlalchemy import select, or_, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi_babel import _
+from fastapi import BackgroundTasks
 
+from app.api.schemas.users import UserCreate
 from app.db.models import User as UserModel
+from app.exceptions.tokens import InvalidTokenException
 from app.exceptions.users import (
     EmailAlreadyExistsException,
     PhoneAlreadyExistsException,
     UserNotFoundException,
 )
+from app.utils.send_email import send_confirmation_email
+from app.core.config import get_settings
+
+settings = get_settings()
+SECRET_KEY = settings.SECRET_KEY
+frontend_url = settings.FRONTEND_URL
+
+s = URLSafeTimedSerializer(settings.SECRET_KEY)
 
 
 class UserService:
     @staticmethod
-    async def signup(user, session: AsyncSession):
+    async def signup(
+        user: UserCreate,
+        accept_language: str,
+        session: AsyncSession,
+        background_tasks: BackgroundTasks,
+    ):
         query = select(UserModel).where(
             or_(UserModel.email == user.email, UserModel.phone == user.phone)
         )
@@ -40,9 +57,46 @@ class UserService:
 
         session.add(new_user)
         await session.commit()
+
         await session.refresh(new_user)
 
+        s = URLSafeTimedSerializer(settings.SECRET_KEY)
+        confirmation_token = s.dumps(new_user.email)
+        confirmation_url = (
+            f"{settings.FRONTEND_URL}/users/signup_confirm?token={confirmation_token}"
+        )
+
+        if accept_language == "en":
+            background_tasks.add_task(
+                send_confirmation_email,
+                new_user.email,
+                confirmation_url,
+                "Email confirmation",
+                "en/email_confirmation.html",
+            )
+        else:
+            background_tasks.add_task(
+                send_confirmation_email,
+                new_user.email,
+                confirmation_url,
+                "Подтверждение электронной почты",
+                "ru/email_confirmation.html",
+            )
+        print(f"🟢 DEBUG {confirmation_url}")
         return new_user
+
+    @staticmethod
+    async def confirm_email(token: str, session: AsyncSession) -> None:
+        try:
+            email = s.loads(token, max_age=600)  # The token is valid for 10 minutes.
+        except BadSignature:
+            raise InvalidTokenException()
+
+        query = (
+            update(UserModel).where(UserModel.email == email).values(is_verified=True)
+        )
+        await session.execute(query)
+        await session.commit()
 
     @staticmethod
     async def get_users(session: AsyncSession):

@@ -2,6 +2,7 @@ from zoneinfo import ZoneInfo
 from celery import Celery
 from celery.schedules import crontab
 from .revoked_token_task import cleanup_expired_tokens
+from .unverified_users_task import cleanup_unverified_users
 from .notification_email import (
     send_uncompleted_task_notification,
     send_delayed_task_notification,
@@ -25,9 +26,13 @@ celery_app.autodiscover_tasks(["app.tasks"])
 celery_app.conf.timezone = LOCAL_TZ
 
 celery_app.conf.beat_schedule = {
-    "cleanup-tokens-every-day": {
+    "cleanup_tokens_every_day": {
         "task": cleanup_expired_tokens.name,
         "schedule": crontab(hour=0, minute=0),  # Launch every midnight (UTC)
+    },
+    "cleanup_unverified_users": {
+        "task": cleanup_unverified_users.name,
+        "schedule": crontab(hour="*/2", minute=0),  # Launch every 2 hours
     },
     "send_uncompleted_notification": {
         "task": send_uncompleted_task_notification.name,

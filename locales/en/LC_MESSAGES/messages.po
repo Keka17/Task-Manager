@@ -130,6 +130,10 @@ msgstr "Not allowed: admin access needed."
 msgid "Вы не авторизованы."
 msgstr "You are not authorized."
 
+#: app/exceptions/users.py:61
+msgid "Запрещено: подтвердите email."
+msgstr "Not allowed: confirm your email."
+
 #: app/services/auth_service.py:119
 msgid "Выход из системы выполнен успешно."
 msgstr "You have successfully logged out."
@@ -139,3 +143,6 @@ msgstr "You have successfully logged out."
 msgid "Пользователь с id = %(user_id)d успешно удален."
 msgstr "The user with id = %(user_id)d has been successfully deleted."
 
+
+msgid "Email подтвержден! Теперь вы можете войти в систему и начать работу."
+msgstr "Your email has been verified! You can now log in and get started."

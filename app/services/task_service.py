@@ -2,7 +2,6 @@ from datetime import datetime, timezone, timedelta
 from zoneinfo import ZoneInfo
 
 from fastapi import BackgroundTasks
-from fastapi_babel import _
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload

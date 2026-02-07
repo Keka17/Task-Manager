@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Depends
+from typing import Optional
+from fastapi import APIRouter, Depends, BackgroundTasks, Header
+from fastapi_babel import _
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.database import get_db_connection
@@ -20,18 +22,44 @@ ALGORITHM = settings.ALGORITHM
 @router.post(
     "/signup",
     response_model=UserSchema,
-    summary="Registration of a new user in the system",
-    description="**Creates a new account in the system**:  \n"
+    summary="Registering a new user and starting verification",
+    description="Creates a new account with limited rights:  \n"
     "- Checks the **uniqueness** of the email address and phone number. \n\n"
     "- **Hashes** the password before saving.  \n"
-    "- Throws an error if the data is already **taken**.",
+    "- Creates a record in the database with status **'is_verified=False'**.  \n"
+    "- **Backround Task**: Sends an email with a confirmation link.  \n\n"
+    "After registration, the user **must confirm** their email before login process. ",
 )
-async def signup(user: UserCreate, session: AsyncSession = Depends(get_db_connection)):
+async def signup(
+    user: UserCreate,
+    backgroud_tasks: BackgroundTasks,
+    accept_language: Optional[str] = Header(None),
+    session: AsyncSession = Depends(get_db_connection),
+):
     """
     User registration endpoint with storage in the database.
     """
-    new_user = await UserService.signup(user, session)
+    new_user = await UserService.signup(user, accept_language, session, backgroud_tasks)
     return new_user
+
+
+@router.get(
+    "/signup_confirm",
+    summary="Registration confirmation via link",
+    description="Activates a usser account: \n\n"
+    "- Accepts a **temporary token** from the URL.  \n\n"
+    "- Verifies the **digital signature** and the **token's lifetime** (10 minutes).  \n\n"
+    "If verification is successful, sets **'is_verified=True'**.",
+)
+async def confirm_signup(
+    token: str, session: AsyncSession = Depends(get_db_connection)
+):
+    await UserService.confirm_email(token, session)
+    return {
+        "message": _(
+            "Email подтвержден! Теперь вы можете войти в систему и начать работу."
+        )
+    }
 
 
 @router.get(

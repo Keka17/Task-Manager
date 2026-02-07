@@ -29,7 +29,7 @@ conf = ConnectionConfig(
 
 async def send_async_email(task, subject, template):
     """
-    Asynchronous sending of notification letters about level A tasks.
+    Asynchronous sending of notification letters about A-level tasks / admin remark.
     """
     deadline = task.deadline_date.astimezone(LOCAL_TZ).strftime("%Y-%m-%d %H:%M")
     template_data = {
@@ -51,4 +51,21 @@ async def send_async_email(task, subject, template):
         await fm.send_message(message, template_name=template)
     except Exception as e:
         message = f"Error during sending a mail to {task.user_email}:\n{e}"
+        logger.add(lambda m: print(message, end=""), level="ERROR")
+
+
+async def send_confirmation_email(to_email, link, subject, template):
+    template_data = {"link": link}
+
+    message = MessageSchema(
+        subject=subject,
+        recipients=[to_email],
+        template_body=template_data,
+        subtype=MessageType.html,
+    )
+    fm = FastMail(conf)
+    try:
+        await fm.send_message(message, template_name=template)
+    except Exception as e:
+        message = f"Error during sending a mail to {to_email}:\n{e}"
         logger.add(lambda m: print(message, end=""), level="ERROR")

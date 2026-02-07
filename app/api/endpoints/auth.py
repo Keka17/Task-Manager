@@ -41,6 +41,7 @@ async def login_page(request: Request):
     responses={
         200: {"description": "Successful login"},
         401: {"description": "Invalid credentials"},
+        403: {"description": "Unverified user"},
         404: {"description": "User not found"},
     },
     tags=["Authentication"],

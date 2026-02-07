@@ -52,3 +52,12 @@ class UnauthorizedException(AppException):
         super().__init__(
             status_code=401, message=_("Вы не авторизованы."), error_code="UNAUTHORIZED"
         )
+
+
+class NotVerifiedException(AppException):
+    def __init__(self):
+        super().__init__(
+            status_code=403,
+            message=_("Запрещено: подтвердите email."),
+            error_code="FORBIDDEN",
+        )
