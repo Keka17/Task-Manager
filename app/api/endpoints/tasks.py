@@ -13,23 +13,32 @@ from app.api.schemas.tasks import (
     Task as TaskSchema,
 )
 from app.services.task_service import TaskService
-from app.dependencies.deps import admin_required, get_current_user
+from app.dependencies.deps import admin_required, get_current_user_cookie
 from app.core.websocket_manager import manager
 
-router = APIRouter(prefix="/tasks", tags=["Tasks"])
+router = APIRouter(prefix="/tasks")
 
 
-@router.post("/", response_model=TaskSchema)
+@router.post(
+    "/",
+    response_model=TaskSchema,
+    summary="Creating a new task",
+    description="**Creates a task and stored it in the database**.  \n\n"
+    "- **Security**: a valid **Access Token** is required in cookies 🍪.  \n\n"
+    "- **Background Tasks**: sending an email after **A**-level task creation.  \n"
+    "- **Real-time**: sends a *'task_created'* notification via WebSocket.",
+    tags=["Tasks"],
+)
 async def create_task(
     task_in: TaskCreate,
     backgroud_tasks: BackgroundTasks,
     accept_language: Optional[str] = Header(None),
-    current_user: UserModel = Depends(get_current_user),
+    current_user: UserModel = Depends(get_current_user_cookie),
     session: AsyncSession = Depends(get_db_connection),
 ):
     """
     Creating a task with storage in the database.
-    Only available with a valid Access Token in the Authorization header.
+    Only available with a valid Access Token in cookies.
     """
     new_task = await TaskService.create_task(
         task_in, accept_language, current_user, session, backgroud_tasks
@@ -47,22 +56,37 @@ async def create_task(
     return new_task
 
 
-@router.get("/", response_model=list[TaskSchema])
+@router.get(
+    "/",
+    response_model=list[TaskSchema],
+    summary="List of all tasks with filtration",
+    description="Retrieves all tasks from the database. A valid **Access Token** is required in cookies 🍪.  \n\n"
+    "Available filters (Qery params):  \n\n"
+    "- **level**: Importance level (*A, B, C, D*);  \n\n"
+    "- **completed**: Completion status (*True/False*).",
+    tags=["Tasks"],
+)
 async def get_tasks(
     level: Optional[str] = Query(default=None, min_length=1, max_length=1),
     completed: Optional[bool] = Query(default=None),
-    current_user: UserModel = Depends(get_current_user),
+    current_user: UserModel = Depends(get_current_user_cookie),
     session: AsyncSession = Depends(get_db_connection),
 ):
     """
     Retrieving a list of all tasks.
-    Query parameters: level (importance_level), completed (if completed_at is not Null).
-    Only available with a valid Access Token in the Authorization header.
+    Query parameters: level, completed.
+    Only available with a valid Access Token in cookies.
     """
     return await TaskService.get_all_tasks(level, completed, current_user, session)
 
 
-@router.get("/board")
+@router.get(
+    "/board",
+    summary="Tasks for the board",
+    description="Retrieves all **uncompleted** tasks.   \n"
+    "Used by the frontend to display the general kanban/board.",
+    tags=["Frontend"],
+)
 async def get_tasks_for_board(session: AsyncSession = Depends(get_db_connection)):
     """
     Retrieving a list of all uncompleted tasks for the board.
@@ -71,7 +95,13 @@ async def get_tasks_for_board(session: AsyncSession = Depends(get_db_connection)
     return await TaskService.get_all_tasks_for_board(session)
 
 
-@router.get("/board/{task_id}")
+@router.get(
+    "/board/{task_id}",
+    summary="Task details on the board",
+    description="Displaying detailed information about "
+    "a specific task for display in the board's modal window.",
+    tags=["Frontend"],
+)
 async def get_task_details(
     task_id: int, session: AsyncSession = Depends(get_db_connection)
 ):
@@ -82,22 +112,38 @@ async def get_task_details(
     return await TaskService.get_task_by_id_board(task_id, session)
 
 
-@router.get("/my_tasks", response_model=list[TaskSchema])
+@router.get(
+    "/my_tasks",
+    response_model=list[TaskSchema],
+    summary="My tasks",
+    description="Retrieves a list of all tasks created by the **current authorized user**.",
+    tags=["Tasks"],
+)
 async def get_user_tasks(
-    current_user: UserModel = Depends(get_current_user),
+    current_user: UserModel = Depends(get_current_user_cookie),
     session: AsyncSession = Depends(get_db_connection),
 ):
     """
     Retrieving a list of all user tasks.
-    Only available with a valid Access Token in the Authorization header.
+    Only available with a valid Access Token in cookies.
     """
     return await TaskService.get_my_tasks(current_user, session)
 
 
-@router.get("/{task_id}", response_model=TaskSchema)
+@router.get(
+    "/{task_id}",
+    response_model=TaskSchema,
+    summary="Retrieve a specific tasks by ID",
+    description="Retrieves detailed information about the task.  \n\n"
+    "**Security**: a valid **Access Token** is required in cookies 🍪.",
+    responses={
+        404: {"description": "Task not found"},
+    },
+    tags=["Tasks"],
+)
 async def get_task(
     task_id: int,
-    current_user: UserModel = Depends(get_current_user),
+    current_user: UserModel = Depends(get_current_user_cookie),
     session: AsyncSession = Depends(get_db_connection),
 ):
     """
@@ -107,11 +153,19 @@ async def get_task(
     return await TaskService.get_task_by_id(task_id, current_user, session)
 
 
-@router.patch("/{task_id}", response_model=TaskSchema)
+@router.patch(
+    "/{task_id}",
+    response_model=TaskSchema,
+    summary="Editing task content",
+    description="Updates the 'content' text field of the task.  \n\n"
+    "- **Restriction**: Only the author of the task can edit it.  \n\n"
+    "- **Real-time**: sends a *'task_updated'* notification via WebSocket.",
+    tags=["Tasks"],
+)
 async def update_task(
     task_id: int,
     task_update: TaskUpdate,
-    current_user: UserModel = Depends(get_current_user),
+    current_user: UserModel = Depends(get_current_user_cookie),
     session: AsyncSession = Depends(get_db_connection),
 ):
     """
@@ -134,10 +188,17 @@ async def update_task(
     return updated_task
 
 
-@router.patch("/complete/{task_id}")
+@router.patch(
+    "/complete/{task_id}",
+    summary="Completion of the task",
+    description="Adds a timestamp in the '*completed_at*' field."
+    "Only available to the **author**.  \n\n"
+    "**Real-time**: sends a *'task_completed'* notification via WebSocket.",
+    tags=["Tasks"],
+)
 async def complete_task(
     task_id: int,
-    current_user: UserModel = Depends(get_current_user),
+    current_user: UserModel = Depends(get_current_user_cookie),
     session: AsyncSession = Depends(get_db_connection),
 ):
     """
@@ -152,7 +213,14 @@ async def complete_task(
     }
 
 
-@router.patch("/remark/{task_id}", response_model=TaskSchema)
+@router.patch(
+    "/remark/{task_id}",
+    response_model=TaskSchema,
+    summary="Adding a comment (Admin)",
+    description="Allows the administrator to add a remark on the task.  \n\n"
+    "**Background Tasks**: sending an email after creating a remark.",
+    tags=["Tasks"],
+)
 async def create_remark(
     task_id: int,
     task_update: TaskUpdateAdmin,
@@ -170,10 +238,17 @@ async def create_remark(
     )
 
 
-@router.delete("/{task_id}")
+@router.delete(
+    "/{task_id}",
+    summary="Deleting a task",
+    description="Permanently delete a task from the database.  \n\n"
+    "**Restriction**: Only the author OR admin can delete a task. \n\n"
+    "**Real-time**: sends a *'task_deleted'* notification via WebSocket.",
+    tags=["Tasks"],
+)
 async def delete_task(
     task_id: int,
-    current_user: UserModel = Depends(get_current_user),
+    current_user: UserModel = Depends(get_current_user_cookie),
     session: AsyncSession = Depends(get_db_connection),
 ):
     """

@@ -54,7 +54,7 @@ class AuthService:
         }
 
     @staticmethod
-    async def refresh(x_refresh_token, session: AsyncSession):
+    async def refresh(x_refresh_token, session: AsyncSession) -> dict:
         try:
             payload = jwt.decode(x_refresh_token, SECRET_KEY, algorithms=[ALGORITHM])
         except PyJWTError:

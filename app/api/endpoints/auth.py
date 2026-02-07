@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Header, Request
+from fastapi import APIRouter, Depends, Header, Request, Response
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.responses import HTMLResponse
@@ -23,7 +23,7 @@ templates = Jinja2Templates(directory="app/templates")
     response_class=HTMLResponse,
     summary="Displays the HTML login page",
     description="Displays a rendered HTML page  with an authorisation form.",
-    tags=["Frontentd"],
+    tags=["Frontend"],
 )
 async def login_page(request: Request):
     """
@@ -36,7 +36,8 @@ async def login_page(request: Request):
     "/login",
     summary="Authorisation and token retrieving",
     description="Verifying email and password. "
-    "Returns a pair of tokens: **Access** (short) and **Refresh** (long).",
+    "Returns a pair of tokens: **Access** (short) and **Refresh** (long).  \n\n"
+    "Access token is stored in **cookies** 🍪.",
     responses={
         200: {"description": "Successful login"},
         401: {"description": "Invalid credentials"},
@@ -44,11 +45,25 @@ async def login_page(request: Request):
     },
     tags=["Authentication"],
 )
-async def login(user_in: UserLogin, session: AsyncSession = Depends(get_db_connection)):
+async def login(
+    user_in: UserLogin,
+    response: Response,
+    session: AsyncSession = Depends(get_db_connection),
+):
     """
     Verifying credentials to get a JWT token.
     """
     tokens = await AuthService.login(user_in, session)
+    access_token = tokens["access_token"]
+
+    # Store access token in cookies
+    response.set_cookie(
+        key="user_access_token",
+        value=access_token,
+        httponly=True,  # JS protection
+        secure=True,  # HTTPS only
+        samesite="lax",  # CSRF protection
+    )
 
     return tokens
 
@@ -58,7 +73,7 @@ async def login(user_in: UserLogin, session: AsyncSession = Depends(get_db_conne
     summary="Updating a pair of Access/Refresh tokens",
     description="Renewing the session without re-entering password:  \n\n"
     "- Accepts the old **Refresh Token** in the *'x-refresh-token'* header.  \n\n"
-    "- The old token is added to the **Blacklist** (revoked tokens in the database.)   \n"
+    "- The old token is added to the **Blacklist** (revoked tokens in the database).   \n"
     "- Returns a pair of new tokens.",
     responses={
         400: {"description": "Invalid token type"},
@@ -67,6 +82,7 @@ async def login(user_in: UserLogin, session: AsyncSession = Depends(get_db_conne
     tags=["Authentication"],
 )
 async def refresh_token(
+    response: Response,
     x_refresh_token: str = Header(...),
     session: AsyncSession = Depends(get_db_connection),
 ):
@@ -76,19 +92,32 @@ async def refresh_token(
     and generates new Access and Refresh tokens.
     """
     new_tokens = await AuthService.refresh(x_refresh_token, session)
+    access_token = new_tokens["access_token"]
+
+    # Store access token in cookies
+    response.set_cookie(
+        key="user_access_token",
+        value=access_token,
+        httponly=True,  # JS protection
+        secure=True,  # HTTPS only
+        samesite="lax",  # CSRF protection
+    )
+
     return new_tokens
 
 
 @router.post(
     "/logout",
     summary="Closing the session.",
-    description="Deactivates the current **Refresh Token**.  \n"
-    "Retrieves  token's **JTI** and adds its to the revoked tokens database. "
-    "After that, this Refresh Token will become **invalid**.",
+    description="Deactivates the current **Refresh Token**.  \n\n"
+    "- Accepts Refresh Token in the *'x-refresh-token'* header. \n\n"
+    "- Retrieves  token's **JTI** , and adds its to the revoked tokens database. \n\n"
+    "- After that, this Refresh Token will become **invalid**.",
     responses={401: {"description": "Invalid token"}},
     tags=["Authentication"],
 )
 async def logout(
+    response: Response,
     x_refresh_token: str = Header(...),
     session: AsyncSession = Depends(get_db_connection),
 ):
@@ -97,4 +126,6 @@ async def logout(
     retrieves the JTI from the current token and adds it to the database.
     """
     result = await AuthService.logout(x_refresh_token, session)
+    response.delete_cookie(key="users_access_token")
+
     return result

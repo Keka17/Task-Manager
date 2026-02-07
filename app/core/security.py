@@ -69,3 +69,19 @@ def decode_jwt_token(token: str = Depends(oauth2_scheme)) -> dict:
     except jwt.exceptions.InvalidTokenError as e:
         print(f"JWT Error: {e}")
         raise InvalidTokenException()
+
+
+def decode_jwt_token_cookie(token: str) -> dict:
+    """
+    Extracts user information from the access token.
+    """
+    if not token:
+        raise UnauthorizedException()
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        return payload
+    except jwt.exceptions.ExpiredSignatureError:
+        raise TokenExpiredException()
+    except jwt.exceptions.InvalidTokenError as e:
+        print(f"JWT Error: {e}")
+        raise InvalidTokenException()
