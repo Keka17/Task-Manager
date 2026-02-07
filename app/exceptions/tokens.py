@@ -21,7 +21,7 @@ class InvalidTokenException(AppException):
 class InvalidTokenTypeException(AppException):
     def __init__(self, expected_type: str):
         super().__init__(
-            status_code=401,
+            status_code=400,
             message=_("Невалидный тип токена. Ожидается: %(expected_type)s.")
             % {"expected_type": expected_type},
             error_code="INVALID_TOKEN_TYPE",

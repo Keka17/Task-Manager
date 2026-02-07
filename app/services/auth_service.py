@@ -30,7 +30,7 @@ class AuthService:
     """
 
     @staticmethod
-    async def login(user_in, session: AsyncSession):
+    async def login(user_in, session: AsyncSession) -> dict:
         query = select(UserModel).where(UserModel.email == user_in.email)
         result = await session.execute(query)
         user_in_db = result.scalars().first()

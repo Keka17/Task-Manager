@@ -15,6 +15,40 @@ from app.core.config import get_settings
 settings = get_settings()
 
 
+# For documentation
+def example_task_in(schema: dict) -> None:
+    schema["example"] = {
+        "title": "The 'Dundies' Awards Ceremony",
+        "content": "Write personal (but not offensive!) nominations for each colleague.",
+        "importance_level": "C",
+    }
+
+
+def example_task_update(schema: dict) -> None:
+    schema["example"] = {
+        "content": "Use quirks and funny moments, avoid sensitive topics."
+    }
+
+
+def example_remark_create(schema: dict) -> None:
+    schema["example"] = {"remark": "Michael's forced fun with a musical climax."}
+
+
+def example_task_out(schema: dict) -> None:
+    schema["example"] = {
+        "title": "The 'Dundies' Awards Ceremony",
+        "content": "Write personal (but not offensive!) nominations for each colleague",
+        "importance_level": "C",
+        "id": 12,
+        "user_email": "dundermifflin@gmail.com",
+        "remark": "Michael's forced fun with a musical climax.",
+        "created_at": "2026-01-29 14:59",
+        "deadline_date": "2026-01-31 19:00",
+        "updated_at": "2026-01-30 02:12",
+        "completed_at": "Null",
+    }
+
+
 class TaskBase(BaseModel):
     title: str
     content: str
@@ -55,13 +89,19 @@ class TaskCreate(TaskBase):
             )
         return level
 
+    model_config = ConfigDict(json_schema_extra=example_task_in)
+
 
 class TaskUpdate(BaseModel):
     content: Optional[str] = None
 
+    model_config = ConfigDict(json_schema_extra=example_task_update)
+
 
 class TaskUpdateAdmin(BaseModel):
     remark: Optional[str] = None
+
+    model_config = ConfigDict(json_schema_extra=example_remark_create)
 
 
 # Custom datetime object output based on the time zone
@@ -84,4 +124,4 @@ class Task(TaskBase):
     updated_at: DateTimeHuman
     completed_at: DateTimeHuman | None = None
 
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(from_attributes=True, json_schema_extra=example_task_out)

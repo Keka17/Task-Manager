@@ -12,7 +12,7 @@ from app.core.config import get_settings
 settings = get_settings()
 
 # Extracts the token from the Authorization header
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login", auto_error=False)
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login", auto_error=False)
 
 SECRET_KEY = settings.SECRET_KEY
 ALGORITHM = settings.ALGORITHM

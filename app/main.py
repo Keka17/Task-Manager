@@ -52,7 +52,17 @@ logger.add(
 )
 
 
-app = FastAPI()
+app = FastAPI(
+    title="Task Manager API",
+    description="This is a real-time task manager with an interactive board",
+    swagger_ui_parameters={
+        "defaultModelsExpandDepth": -1,  # Hide models section by default
+        "docExpansion": "none",  # Collapse all sections by default,
+        "displayRequestDuration": True,
+        "tryItOutEnabled": True,
+        "persistAuthorization": True,
+    },
+)
 
 
 babel_configs = BabelConfigs(

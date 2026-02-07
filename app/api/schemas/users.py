@@ -6,6 +6,34 @@ from app.core.config import get_settings
 settings = get_settings()
 
 
+# For documentation
+def example_user_in(schema: dict) -> None:
+    schema["example"] = {
+        "name": "Michael Scott",
+        "position": "World's best boss",
+        "email": "dundermifflin@gmail.com",
+        "phone": "89777907157",
+        "password": "Str0ngP@$$w678",
+    }
+
+
+def example_user_out(schema: dict) -> None:
+    schema["example"] = {
+        "name": "Michael Scott",
+        "position": "World's best boss",
+        "email": "dundermifflin@gmail.com",
+        "phone": "89777907157",
+        "id": 94,
+    }
+
+
+def example_login(schema: dict) -> None:
+    schema["example"] = {
+        "email": "dundermifflin@gmail.com",
+        "password": "Str0ngP@$$w678",
+    }
+
+
 class UserBase(BaseModel):
     name: str
     position: str
@@ -77,13 +105,17 @@ class UserCreate(UserBase):
                 )
             )
 
+    model_config = ConfigDict(json_schema_extra=example_user_in)
+
 
 class User(UserBase):
     id: int
 
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(from_attributes=True, json_schema_extra=example_user_out)
 
 
 class UserLogin(BaseModel):
     email: str
     password: str
+
+    model_config = ConfigDict(json_schema_extra=example_login)
