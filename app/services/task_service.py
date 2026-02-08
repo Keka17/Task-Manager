@@ -65,6 +65,8 @@ class TaskService:
         await session.commit()
         await session.refresh(new_task)
 
+        accept_language = accept_language.split(",")[0].split("-")[0]
+
         if new_task.importance_level == "A":
             if accept_language == "en":
                 background_tasks.add_task(
@@ -210,6 +212,8 @@ class TaskService:
 
         await session.commit()
         await session.refresh(task)
+
+        accept_language = accept_language.split(",")[0].split("-")[0]
 
         if accept_language == "en":
             background_tasks.add_task(

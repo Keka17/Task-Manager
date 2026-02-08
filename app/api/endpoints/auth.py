@@ -7,6 +7,7 @@ from app.db.database import get_db_connection
 from app.api.schemas.users import UserLogin
 
 from app.core.config import get_settings
+from app.core.templates import templates
 from app.services.auth_service import AuthService
 
 router = APIRouter(prefix="/auth")
@@ -15,7 +16,6 @@ settings = get_settings()
 
 SECRET_KEY = settings.SECRET_KEY
 ALGORITHM = settings.ALGORITHM
-templates = Jinja2Templates(directory="app/templates")
 
 
 @router.get(

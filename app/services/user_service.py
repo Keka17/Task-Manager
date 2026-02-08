@@ -73,6 +73,8 @@ class UserService:
             f"{settings.FRONTEND_URL}/users/signup_confirm?token={confirmation_token}"
         )
 
+        accept_language = accept_language.split(",")[0].split("-")[0]
+
         if accept_language == "en":
             background_tasks.add_task(
                 send_confirmation_email,
@@ -93,9 +95,9 @@ class UserService:
 
         return {
             "message": _(
-                "Для завершения регистрации необходимо подтвердить email. "
+                f"Для завершения регистрации необходимо подтвердить email. "
                 "Пожалуйста, проверьте вашу почту. Если профиль не будет подтвержден "
-                "в течение 10 минут, он будет автоматически удален."
+                f"в течение 10 минут, он будет автоматически удален."
             )
         }
 
@@ -103,6 +105,7 @@ class UserService:
     async def confirm_email(
         request: Request, token: str, accept_lanuage: str, session: AsyncSession
     ) -> HTMLResponse:
+        accept_language = accept_lanuage.split(",")[0].split("-")[0]
         try:
             email = s.loads(
                 token, max_age=600
@@ -110,7 +113,7 @@ class UserService:
         except BadSignature:
             template_name = (
                 "en/invalid_link.html"
-                if accept_lanuage == "en"
+                if accept_language == "en"
                 else "ru/invalid_link.html"
             )
             return templates.TemplateResponse(request=request, name=template_name)

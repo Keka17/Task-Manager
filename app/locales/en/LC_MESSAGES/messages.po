@@ -153,3 +153,62 @@ msgid "Для завершения регистрации необходимо �
 msgstr "To complete registration, you must confirm your email address. "
        "Please check your email. If your profile is not confirmed "
        "within 10 minutes, it will be automatically deleted."
+
+msgid "Позиции не существует. Доступные позиции:"
+msgstr "This position does not exist. Available positions:"
+
+msgid "To-Do Стенд"
+msgstr "To-Do Stand"
+
+msgid "Мененджер задач — Матрица Эйзенхауэра"
+msgstr "Task Manager — Eisenhower Matrix"
+
+msgid "Выйти"
+msgstr "Log out"
+
+msgid "A. Важно / Срочно"
+msgstr "A. Important / Urgent"
+
+msgid "Наивысший приоритет"
+msgstr "Highest priority"
+
+msgid "B. Важно / Не срочно"
+msgstr "B. Important / Not urgent"
+
+msgid "Высокий приоритет"
+msgstr "High priority"
+
+
+msgid "C. Не важно / Срочно"
+msgstr "C. Not important / Urgent"
+
+
+msgid "Умеренный приоритет"
+msgstr "Medium priority"
+
+msgid "D. Не срочно / Не важно"
+msgstr "D. Not urgent / Not important"
+
+msgid "Низкий приоритет"
+msgstr "Low priority"
+
+msgid "Детали задачи"
+msgstr "Task details"
+
+msgid "Описание"
+msgstr "Description"
+
+msgid "Ремарка"
+msgstr "Remark"
+
+msgid "Вход"
+msgstr "Login"
+
+msgid "Пароль"
+msgstr "Password"
+
+msgid "Войти"
+msgstr "Log in"
+
+msgid "Вход в систему..."
+msgstr "Logging in..."

@@ -51,10 +51,10 @@ class UserCreate(UserBase):
         if positions:
             positions_list = positions.split(",")
             allowed_positions = ", ".join(positions_list)
+            error_msg = _("Позиции не существует. Доступные позиции:")
+            full_msg = f"{error_msg}\n{allowed_positions}"
             if position not in positions_list:
-                raise ValueError(
-                    _(f"Позиции не существует. Доступные позиции:\n{allowed_positions}")
-                )
+                raise ValueError(full_msg)
 
         return position
 

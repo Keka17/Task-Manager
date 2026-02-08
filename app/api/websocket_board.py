@@ -1,13 +1,11 @@
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Request, Depends
-
 from starlette.responses import HTMLResponse
 
 from app.dependencies.deps import get_current_user_ws
 from app.core.websocket_manager import manager
-from fastapi.templating import Jinja2Templates
+from app.core.templates import templates
 
 router = APIRouter(prefix="/ws")
-templates = Jinja2Templates(directory="app/templates")
 
 
 @router.websocket("")

@@ -3,23 +3,23 @@
 
 <head>
     <meta charset="UTF-8" />
-    <title>Мененджер задач — Матрица Эйзенхауэра</title>
+    <title>{{_("Мененджер задач — Матрица Эйзенхауэра")}}</title>
     <link rel="stylesheet" href="{{ url_for('static', path='styles/board.css') }}">
     <link rel="icon" href="{{ url_for('static', path='pictures/favicon.png') }}" type="image/png">
 </head>
 
 <body>
     <div class="header-container">
-        <h1 class="page-title">To-Do Стенд</h1>
-        <button class="logout-btn" onclick="logout()">Выйти</button>
+        <h1 class="page-title">{{_("To-Do Стенд")}}</h1>
+        <button class="logout-btn" onclick="logout()">{{_("Выйти")}}</button>
     </div>
     <div class="matrix">
 
         <!-- Q1 -->
         <section class="quadrant q1">
             <header class="quadrant-header">
-                A. Важно / Срочно<br />
-                <span>Наивысший приоритет</span>
+                {{_("A. Важно / Срочно")}}<br />
+                <span>{{_("Наивысший приоритет")}}</span>
             </header>
             <ul class="task-list" id="q1"></ul>
         </section>
@@ -27,8 +27,8 @@
         <!-- Q2 -->
         <section class="quadrant q2">
             <header class="quadrant-header">
-                B. Важно / Не срочно<br />
-                <span>Высокий приоритет</span>
+                {{_("B. Важно / Не срочно")}}<br />
+                <span>{{_("Высокий приоритет")}}</span>
             </header>
             <ul class="task-list" id="q2"></ul>
         </section>
@@ -36,8 +36,8 @@
         <!-- Q3 -->
         <section class="quadrant q3">
             <header class="quadrant-header">
-                C. Не важно / Срочно<br />
-                <span>Умеренный приоритет</span>
+                {{_("C. Не важно / Срочно")}}<br />
+                <span>{{_("Умеренный приоритет")}}</span>
             </header>
             <ul class="task-list" id="q3"></ul>
         </section>
@@ -45,8 +45,8 @@
         <!-- Q4 -->
         <section class="quadrant q4">
             <header class="quadrant-header">
-                D. Не срочно / Не важно<br />
-                <span>Низкий приоритет</span>
+                {{_("D. Не срочно / Не важно")}}<br />
+                <span>{{_("Низкий приоритет")}}</span>
             </header>
             <ul class="task-list" id="q4"></ul>
         </section>
@@ -56,18 +56,18 @@
 
     <div id="modal" class="modal">
         <div class="modal-header">
-            <h2 id="modal-title" class="modal-title">Task Details</h2>
+            <h2 id="modal-title" class="modal-title">{{_("Детали задачи")}}</h2>
             <button class="modal-close" onclick="closeModal()">×</button>
         </div>
 
         <div class="modal-body">
             <div class="modal-section">
-                <div class="modal-label">Description</div>
+                <div class="modal-label">{{_("Описание")}}</div>
                 <p id="modal-content" class="modal-content"></p>
             </div>
 
             <div id="remark-section" class="modal-section" style="display: none;">
-                <div class="modal-label">Remark</div>
+                <div class="modal-label">{{_("Ремарка")}}</div>
                 <p id="modal-remark" class="modal-remark"></p>
             </div>
         </div>
@@ -86,10 +86,9 @@
                     <span id="modal-deadline"></span>
                 </div>
             </div>
-            <div id="modal-importance" class="importance-badge"></div>
+            <div id="modal-importance" class="importance-badge" style="display: none;"></div>
         </div>
     </div>
-
     <script src="{{ url_for('static', path='/scripts/board.js') }}"></script>
 </body>
 

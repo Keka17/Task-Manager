@@ -170,19 +170,19 @@ async function openTask(id) {
         const importanceBadge = document.getElementById("modal-importance");
         const importanceMap = {
             'A': {
-                text: 'Наивысший приоритет',
+                text: 'A',
                 color: '#e0564a'
             },
             'B': {
-                text: 'Высокий приоритет',
+                text: 'B',
                 color: '#7ddc8a'
             },
             'C': {
-                text: 'Умеренный приоритет',
+                text: 'C',
                 color: '#f3e26d'
             },
             'D': {
-                text: 'Низкий приоритет',
+                text: 'D',
                 color: '#19b5f1'
             }
         };

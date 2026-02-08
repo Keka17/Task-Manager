@@ -1,15 +1,15 @@
 from loguru import logger
 import sys
-from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
 from fastapi.staticfiles import StaticFiles
-from fastapi_babel import Babel, BabelConfigs, BabelMiddleware
+from fastapi_babel import BabelConfigs, BabelMiddleware
 
 from app.api.endpoints import users, auth, tasks
 from app.api import websocket_board
 from app.exceptions.base import AppException
+from app.core.templates import templates
 
 from app.middlewares.logs import loguru_middleware
 from app.handlers.exceptions import app_exception_handler
@@ -63,19 +63,20 @@ app = FastAPI(
         "persistAuthorization": True,
     },
 )
-
+from pathlib import Path
 
 babel_configs = BabelConfigs(
-    ROOT_DIR=Path(__file__).resolve().parent,
+    ROOT_DIR=Path(__file__).parent / "locales",
     BABEL_DEFAULT_LOCALE="ru",
     BABEL_TRANSLATION_DIRECTORY="locales",
 )
-
-babel = Babel(configs=babel_configs)
+app.add_middleware(
+    BabelMiddleware, babel_configs=babel_configs, jinja2_templates=templates
+)
 
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
-app.add_middleware(BabelMiddleware, babel_configs=babel_configs)
+
 app.middleware("http")(loguru_middleware)
 
 app.add_exception_handler(AppException, app_exception_handler)
