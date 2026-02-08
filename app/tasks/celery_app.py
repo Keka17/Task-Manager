@@ -2,7 +2,7 @@ from zoneinfo import ZoneInfo
 from celery import Celery
 from celery.schedules import crontab
 from .revoked_token_task import cleanup_expired_tokens
-from .unverified_users_task import cleanup_unverified_users
+from .unverified_user_task import delete_user_task
 from .notification_email import (
     send_uncompleted_task_notification,
     send_delayed_task_notification,
@@ -30,9 +30,9 @@ celery_app.conf.beat_schedule = {
         "task": cleanup_expired_tokens.name,
         "schedule": crontab(hour=0, minute=0),  # Launch every midnight (UTC)
     },
-    "cleanup_unverified_users": {
-        "task": cleanup_unverified_users.name,
-        "schedule": crontab(hour="*/2", minute=0),  # Launch every 2 hours
+    "delete_unverified_users": {
+        "task": delete_user_task.name,
+        "schedule": crontab(minute="*/10"),
     },
     "send_uncompleted_notification": {
         "task": send_uncompleted_task_notification.name,

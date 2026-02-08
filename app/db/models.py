@@ -1,7 +1,6 @@
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import List
 
-from celery.worker.strategy import default
 from sqlalchemy import func
 from sqlalchemy import String, DateTime, ForeignKey, Text, Boolean
 from sqlalchemy.orm import DeclarativeBase
@@ -23,6 +22,9 @@ class User(Base):
     is_verified: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     email: Mapped[str] = mapped_column(String(100), unique=True, nullable=False)
     phone: Mapped[str] = mapped_column(String(11), unique=True, nullable=False)
+    signed_up_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
 
     # relationship: task
     tasks: Mapped[List["Task"]] = relationship(

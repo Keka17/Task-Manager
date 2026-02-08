@@ -1,6 +1,5 @@
 from typing import Optional
-from fastapi import APIRouter, Depends, BackgroundTasks, Header
-from fastapi_babel import _
+from fastapi import APIRouter, Depends, BackgroundTasks, Header, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.database import get_db_connection
@@ -21,14 +20,14 @@ ALGORITHM = settings.ALGORITHM
 
 @router.post(
     "/signup",
-    response_model=UserSchema,
     summary="Registering a new user and starting verification",
     description="Creates a new account with limited rights:  \n"
     "- Checks the **uniqueness** of the email address and phone number. \n\n"
     "- **Hashes** the password before saving.  \n"
     "- Creates a record in the database with status **'is_verified=False'**.  \n"
     "- **Backround Task**: Sends an email with a confirmation link.  \n\n"
-    "After registration, the user **must confirm** their email before login process. ",
+    "After registration, the user **must confirm** their email before login process. "
+    "Otherwise, their profile **will be deleted**.",
 )
 async def signup(
     user: UserCreate,
@@ -39,8 +38,7 @@ async def signup(
     """
     User registration endpoint with storage in the database.
     """
-    new_user = await UserService.signup(user, accept_language, session, backgroud_tasks)
-    return new_user
+    return await UserService.signup(user, accept_language, session, backgroud_tasks)
 
 
 @router.get(
@@ -52,14 +50,12 @@ async def signup(
     "If verification is successful, sets **'is_verified=True'**.",
 )
 async def confirm_signup(
-    token: str, session: AsyncSession = Depends(get_db_connection)
+    request: Request,
+    token: str,
+    accept_language: Optional[str] = Header(None),
+    session: AsyncSession = Depends(get_db_connection),
 ):
-    await UserService.confirm_email(token, session)
-    return {
-        "message": _(
-            "Email подтвержден! Теперь вы можете войти в систему и начать работу."
-        )
-    }
+    return await UserService.confirm_email(request, token, accept_language, session)
 
 
 @router.get(

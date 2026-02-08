@@ -146,3 +146,10 @@ msgstr "The user with id = %(user_id)d has been successfully deleted."
 
 msgid "Email подтвержден! Теперь вы можете войти в систему и начать работу."
 msgstr "Your email has been verified! You can now log in and get started."
+
+msgid "Для завершения регистрации необходимо подтвердить email. "
+      "Пожалуйста, проверьте вашу почту. Если профиль не будет подтвержден "
+      "в течение 10 минут, он будет автоматически удален."
+msgstr "To complete registration, you must confirm your email address. "
+       "Please check your email. If your profile is not confirmed "
+       "within 10 minutes, it will be automatically deleted."

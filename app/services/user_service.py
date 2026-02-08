@@ -1,14 +1,14 @@
 import bcrypt
-from dns.e164 import query
 from itsdangerous import URLSafeTimedSerializer, BadSignature
 from sqlalchemy import select, or_, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi_babel import _
-from fastapi import BackgroundTasks
+from fastapi import BackgroundTasks, Request
+from fastapi.templating import Jinja2Templates
+from fastapi.responses import HTMLResponse
 
 from app.api.schemas.users import UserCreate
 from app.db.models import User as UserModel
-from app.exceptions.tokens import InvalidTokenException
 from app.exceptions.users import (
     EmailAlreadyExistsException,
     PhoneAlreadyExistsException,
@@ -16,10 +16,15 @@ from app.exceptions.users import (
 )
 from app.utils.send_email import send_confirmation_email
 from app.core.config import get_settings
+from pathlib import Path
+
+TEMPLATE_FOLDER = Path(__file__).parent.parent / "templates"
 
 settings = get_settings()
 SECRET_KEY = settings.SECRET_KEY
 frontend_url = settings.FRONTEND_URL
+
+templates = Jinja2Templates(directory=TEMPLATE_FOLDER)
 
 s = URLSafeTimedSerializer(settings.SECRET_KEY)
 
@@ -61,7 +66,9 @@ class UserService:
         await session.refresh(new_user)
 
         s = URLSafeTimedSerializer(settings.SECRET_KEY)
-        confirmation_token = s.dumps(new_user.email)
+        confirmation_token = s.dumps(
+            new_user.email
+        )  # Secure token to confirm registration
         confirmation_url = (
             f"{settings.FRONTEND_URL}/users/signup_confirm?token={confirmation_token}"
         )
@@ -83,20 +90,44 @@ class UserService:
                 "ru/email_confirmation.html",
             )
         print(f"🟢 DEBUG {confirmation_url}")
-        return new_user
+
+        return {
+            "message": _(
+                "Для завершения регистрации необходимо подтвердить email. "
+                "Пожалуйста, проверьте вашу почту. Если профиль не будет подтвержден "
+                "в течение 10 минут, он будет автоматически удален."
+            )
+        }
 
     @staticmethod
-    async def confirm_email(token: str, session: AsyncSession) -> None:
+    async def confirm_email(
+        request: Request, token: str, accept_lanuage: str, session: AsyncSession
+    ) -> HTMLResponse:
         try:
-            email = s.loads(token, max_age=600)  # The token is valid for 10 minutes.
+            email = s.loads(
+                token, max_age=600
+            )  # The token is valid for 60 * 10 (10 mins)
         except BadSignature:
-            raise InvalidTokenException()
+            template_name = (
+                "en/invalid_link.html"
+                if accept_lanuage == "en"
+                else "ru/invalid_link.html"
+            )
+            return templates.TemplateResponse(request=request, name=template_name)
 
         query = (
             update(UserModel).where(UserModel.email == email).values(is_verified=True)
         )
         await session.execute(query)
         await session.commit()
+
+        template_name = (
+            "en/email_confirmed.html"
+            if accept_lanuage == "en"
+            else "ru/email_confirmed.html"
+        )
+
+        return templates.TemplateResponse(request=request, name=template_name)
 
     @staticmethod
     async def get_users(session: AsyncSession):
