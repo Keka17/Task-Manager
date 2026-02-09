@@ -16,8 +16,13 @@ async def async_sql_request():
             query = delete(User).where(
                 User.is_verified == False, User.signed_up_at <= cutoff
             )
-            await session.execute(query)
+            result = await session.execute(query)
             await session.commit()
+
+            deleted_count = result.rowcount
+
+            print(f"🟢 DEBUG: deleted {deleted_count} unverified users.")
+
         except Exception as e:
             await session.rollback()
             print(f"An error occured: {e}")

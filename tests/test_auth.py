@@ -74,26 +74,26 @@ async def test_refresh_token_success(client, async_session):
         headers = {"x-refresh-token": old_refresh_token}
         refresh_response = await client.post("/auth/refresh", headers=headers)
 
-    assert refresh_response.status_code == 200
-    new_tokens = refresh_response.json()
+        assert refresh_response.status_code == 200
+        new_tokens = refresh_response.json()
 
-    assert "access_token" in new_tokens
-    assert "refresh_token" in new_tokens
+        assert "access_token" in new_tokens
+        assert "refresh_token" in new_tokens
 
-    assert new_tokens["access_token"] != old_tokens["access_token"]
-    assert new_tokens["refresh_token"] != old_tokens["refresh_token"]
+        assert new_tokens["access_token"] != old_tokens["access_token"]
+        assert new_tokens["refresh_token"] != old_tokens["refresh_token"]
 
-    # Is revoked token added to the database?
-    query = select(RevokedToken).where(RevokedToken.jti == old_jti)
-    result = await async_session.execute(query)
-    revoked_token = result.scalars().first()
+        # Is revoked token added to the database?
+        query = select(RevokedToken).where(RevokedToken.jti == old_jti)
+        result = await async_session.execute(query)
+        revoked_token = result.scalars().first()
 
-    assert revoked_token is not None
+        assert revoked_token is not None
 
-    # Attempt to refresh with the revoked token
-    retry = await client.post("/auth/refresh", headers=headers)
-    assert retry.status_code == 401
-    assert retry.json()["error_code"] == "TOKEN_REVOKED"
+        # Attempt to refresh with the revoked token
+        retry = await client.post("/auth/refresh", headers=headers)
+        assert retry.status_code == 401
+        assert retry.json()["error_code"] == "TOKEN_REVOKED"
 
 
 async def test_refresh_token_fail(client, async_session):

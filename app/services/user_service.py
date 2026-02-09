@@ -41,13 +41,16 @@ class UserService:
             or_(UserModel.email == user.email, UserModel.phone == user.phone)
         )
         result = await session.execute(query)
-        existing_user = result.scalar_one_or_none()
+        existing_users = result.scalars().all()
 
-        if existing_user:
-            if existing_user.email == user.email:
-                raise EmailAlreadyExistsException(email=user.email)
-            if existing_user.phone == user.phone:
-                raise PhoneAlreadyExistsException(phone=user.phone)
+        print(f"DEBUG {existing_users}")
+
+        if existing_users:
+            for existing_user in existing_users:
+                if existing_user.email == user.email:
+                    raise EmailAlreadyExistsException(email=user.email)
+                if existing_user.phone == user.phone:
+                    raise PhoneAlreadyExistsException(phone=user.phone)
 
         password_bytes = bytes(user.password, "utf-8")
         hashed = bcrypt.hashpw(password_bytes, bcrypt.gensalt())
@@ -91,7 +94,8 @@ class UserService:
                 "Подтверждение электронной почты",
                 "ru/email_confirmation.html",
             )
-        print(f"🟢 DEBUG {confirmation_url}")
+
+        print(f"🟢 DEBUG: confirmation link: {confirmation_url}")
 
         return {
             "message": _(

@@ -28,6 +28,7 @@ ALGORITHM = settings.ALGORITHM
     "- **Backround Task**: Sends an email with a confirmation link.  \n\n"
     "After registration, the user **must confirm** their email before login process. "
     "Otherwise, their profile **will be deleted**.",
+    responses={400: {"description": "Bad Request"}, 409: {"description": "Conflict"}},
 )
 async def signup(
     user: UserCreate,

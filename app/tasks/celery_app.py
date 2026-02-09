@@ -32,7 +32,7 @@ celery_app.conf.beat_schedule = {
     },
     "delete_unverified_users": {
         "task": delete_user_task.name,
-        "schedule": crontab(minute="*/10"),
+        "schedule": crontab(minute="*/5"),
     },
     "send_uncompleted_notification": {
         "task": send_uncompleted_task_notification.name,

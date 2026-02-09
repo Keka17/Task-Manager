@@ -22,9 +22,13 @@ async def test_create_user_success(client, async_session):
         "password": "Il0veM@ano1o",
     }
 
-    response = await client.post("/users/signup", json=payload)
+    # Accept-Language = en
+    response = await client.post(
+        "/users/signup", json=payload, headers={"accept-language": "en"}
+    )
 
     assert response.status_code == 200
+    assert "Please check your email." in response.json()["message"]
 
     query = select(User).where(User.email == payload["email"])
     result = await async_session.execute(query)

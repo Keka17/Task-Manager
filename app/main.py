@@ -2,10 +2,11 @@ from loguru import logger
 import sys
 from pathlib import Path
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.staticfiles import StaticFiles
 from fastapi_babel import BabelConfigs, BabelMiddleware
+from starlette.responses import HTMLResponse
 
 from app.api.endpoints import users, auth, tasks
 from app.api import websocket_board
@@ -90,6 +91,7 @@ app.include_router(tasks.router)
 app.include_router(websocket_board.router)
 
 
-@app.get("/")
-def root():
-    return {"message": "API is running!"}
+@app.get("/", response_class=HTMLResponse)
+def root(request: Request):
+    """Displays a home page"""
+    return templates.TemplateResponse("home.html", {"request": request})
