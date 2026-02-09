@@ -32,7 +32,7 @@ ALGORITHM = settings.ALGORITHM
 async def signup(
     user: UserCreate,
     backgroud_tasks: BackgroundTasks,
-    accept_language: Optional[str] = Header(None),
+    accept_language: Optional[str] = Header("ru"),
     session: AsyncSession = Depends(get_db_connection),
 ):
     """

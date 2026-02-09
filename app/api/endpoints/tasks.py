@@ -33,7 +33,7 @@ router = APIRouter(prefix="/tasks")
 async def create_task(
     task_in: TaskCreate,
     backgroud_tasks: BackgroundTasks,
-    accept_language: Optional[str] = Header(None),
+    accept_language: Optional[str] = Header("ru"),
     current_user: UserModel = Depends(get_current_user_cookie),
     session: AsyncSession = Depends(get_db_connection),
 ):
@@ -226,7 +226,7 @@ async def create_remark(
     task_id: int,
     task_update: TaskUpdateAdmin,
     backgroud_tasks: BackgroundTasks,
-    accept_language: Optional[str] = Header(None),
+    accept_language: Optional[str] = Header("ru"),
     session: AsyncSession = Depends(get_db_connection),
     admin: UserModel = Depends(admin_required),
 ):

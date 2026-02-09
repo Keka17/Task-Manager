@@ -1,5 +1,6 @@
 from loguru import logger
 import sys
+from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
@@ -63,13 +64,14 @@ app = FastAPI(
         "persistAuthorization": True,
     },
 )
-from pathlib import Path
+
 
 babel_configs = BabelConfigs(
     ROOT_DIR=Path(__file__).parent / "locales",
     BABEL_DEFAULT_LOCALE="ru",
     BABEL_TRANSLATION_DIRECTORY="locales",
 )
+
 app.add_middleware(
     BabelMiddleware, babel_configs=babel_configs, jinja2_templates=templates
 )

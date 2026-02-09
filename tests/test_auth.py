@@ -66,11 +66,11 @@ async def test_refresh_token_success(client, async_session):
         login_response = await client.post("/auth/login", json=payload)
         old_tokens = login_response.json()
 
-    old_refresh_token = old_tokens["refresh_token"]
-    old_payload = jwt.decode(old_refresh_token, SECRET_KEY, algorithms=[ALGORITHM])
-    old_jti = old_payload["jti"]  # Old data to compare
+        old_refresh_token = old_tokens["refresh_token"]
+        old_payload = jwt.decode(old_refresh_token, SECRET_KEY, algorithms=[ALGORITHM])
+        old_jti = old_payload["jti"]  # Old data to compare
 
-    with freeze_time("2026-02-01 21:20:10"):
+    with freeze_time("2026-02-01 21:20:05"):
         headers = {"x-refresh-token": old_refresh_token}
         refresh_response = await client.post("/auth/refresh", headers=headers)
 
