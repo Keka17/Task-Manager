@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TaskManager</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="icon" href="{{ url_for('static', path='pictures/favicon.png') }}" type="image/png">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -101,9 +102,8 @@
     <main>
         <div class="content">
             <div class="text-content">
-                <h1>Добро пожаловать в TaskManager API!</h1>
-                <p>Корпоративное веб-приложение для эффективного <b>тайм-менеджмента</b> по
-                    методике <b>матрицы Эйзенхауэра</b>.</p>
+                <h1>{{_("Добро пожаловать в TaskManager API!")}}</h1>
+                <p>{{_("Корпоративное веб-приложение для <b>эффективного тайм-менеджмента</b> по методике <b>матрицы Эйзенхауэра</b>.") | safe }}</p>
             </div>
 
             <div class="image-container">
@@ -111,14 +111,16 @@
             </div>
 
             <div class="text-content">
-                <p>Главная фишка приложения — <a href="http://localhost:8000/ws/enter" style="color: #007bff;" class="inline-link"><b>виртуальная доска задач</b></a>.
-                    Благодаря технологии <b>WebSockets</b>
-                    вам больше не нужно обновлять страницу: статусы задач, новые ремарки администратора и
-                    уведомления синхронизируются мгновенно. Это полноценный <b>real-time опыт</b> для всей команды.</p>
                 <p>
-                    Воспользуйтесь интерактивной документацией для тестирования функционала:
+                    {{_("Главная фишка приложения —") | safe }}
+                    <a href="http://localhost:8000/ws/enter" style="color: #007bff;" class="inline-link">
+                        {{_("<b>виртуальная доска задач</b></a>. Благодаря технологии <b>WebSocket</b> вам больше не нужно обновлять страницу: статусы задач, новые ремарки администратора и уведомления синхронизируются мгновенно. Это полноценный <b>real-time опыт</b> для всей команды.") | safe }}
+                    </a>
                 </p>
-                <a href="http://localhost:8000/docs" class="button">Открыть Swagger UI</a>
+                 <p>
+                    {{_("Воспользуйтесь интерактивной документацией для тестирования функционала:")}}
+                </p>
+                <a href="http://localhost:8000/docs" class="button">{{_("Открыть Swagger UI")}}</a>
             </div>
         </div>
     </main>

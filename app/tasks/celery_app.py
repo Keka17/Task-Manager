@@ -40,7 +40,7 @@ celery_app.conf.beat_schedule = {
     },
     "send_delayed_notification": {
         "task": send_delayed_task_notification.name,
-        "schedule": crontab(minute="*/30"),
+        "schedule": crontab(minute="*/2"),
     },
 }
 

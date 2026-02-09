@@ -91,7 +91,11 @@ app.include_router(tasks.router)
 app.include_router(websocket_board.router)
 
 
-@app.get("/", response_class=HTMLResponse)
+@app.get(
+    "/",
+    response_class=HTMLResponse,
+    summary="Displays the API landing page.",
+    tags=["Frontend"],
+)
 def root(request: Request):
-    """Displays a home page"""
     return templates.TemplateResponse("home.html", {"request": request})

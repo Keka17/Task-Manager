@@ -212,3 +212,24 @@ msgstr "Log in"
 
 msgid "Вход в систему..."
 msgstr "Logging in..."
+
+msgid "Добро пожаловать в TaskManager API!"
+msgstr "Welcome to TaskManager API!"
+
+msgid "Корпоративное веб-приложение для <b>эффективного тайм-менеджмента</b> по методике <b>матрицы Эйзенхауэра</b>."
+msgstr "A corporate web application for <b>effective time management</b> based on the <b>Eisenhower Matrix</b> methodology."
+
+
+msgid "Главная фишка приложения —"
+msgstr "The main feature of the application is a"
+
+
+msgid "<b>виртуальная доска задач</b></a>. Благодаря технологии <b>WebSocket</b> вам больше не нужно обновлять страницу: статусы задач, новые ремарки администратора и уведомления синхронизируются мгновенно. Это полноценный <b>real-time опыт</b> для всей команды."
+msgstr "<b>virtual task board</b></a>. With <b>WebSocket</b> technology, you no longer need to refresh the page: task statuses, new administrator comments, and notifications are synchronized instantly. This is a full-fledged <b>real-time experience</b> for the entire team."
+
+
+msgid "Воспользуйтесь интерактивной документацией для тестирования функционала:"
+msgstr "Use interactive documentation to test functionality:"
+
+msgid "Открыть Swagger UI"
+msgstr "Open Swagger UI"
