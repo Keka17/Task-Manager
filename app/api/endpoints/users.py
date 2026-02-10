@@ -26,6 +26,7 @@ ALGORITHM = settings.ALGORITHM
     "- **Hashes** the password before saving.  \n"
     "- Creates a record in the database with status **'is_verified=False'**.  \n"
     "- **Backround Task**: Sends an email with a confirmation link.  \n\n"
+    "- **Accept-Lanuage** options: ru (defult), en.  \n\n"
     "After registration, the user **must confirm** their email before login process. "
     "Otherwise, their profile **will be deleted**.",
     responses={400: {"description": "Bad Request"}, 409: {"description": "Conflict"}},
@@ -53,7 +54,7 @@ async def signup(
 async def confirm_signup(
     request: Request,
     token: str,
-    accept_language: Optional[str] = Header(None),
+    accept_language: Optional[str] = Header("ru"),
     session: AsyncSession = Depends(get_db_connection),
 ):
     return await UserService.confirm_email(request, token, accept_language, session)
@@ -84,8 +85,8 @@ async def get_users(
     "/me",
     response_model=UserSchema,
     summary="User information",
-    description="Retrieves user information from the **Access Token** "
-    "and returns their profile from the database.",
+    description="Retrieves user information from the database. \n\n"
+    "**Security**: a valid **Access Token** is required in cookies 🍪.",
 )
 async def get_me(current_user: UserModel = Depends(get_current_user_cookie)):
     return current_user
@@ -118,8 +119,8 @@ async def get_user(
     "/{user_id}",
     summary="Deleting a user",
     description="**Completely removes** the user and their tasks from the database.  \n\n"
-    "Requires **admin** rights (verified via access token). \n\n"
-    "**Warning**: This operation cannot be undone.",
+    "Requires **admin** rights (field `is_superuser` in the database). \n\n"
+    "**Warning**: This operation cannot be undone!",
     responses={
         401: {"description": "Unauthorized"},
         403: {"description": "Admin's access is required."},

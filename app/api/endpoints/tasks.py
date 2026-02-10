@@ -24,10 +24,11 @@ router = APIRouter(prefix="/tasks")
     "/",
     response_model=TaskSchema,
     summary="Creating a new task",
-    description="**Creates a task and stored it in the database**.  \n\n"
-    "- **Security**: a valid **Access Token** is required in cookies 🍪.  \n\n"
-    "- **Background Tasks**: sending an email after **A**-level task creation.  \n"
-    "- **Real-time**: sends a *'task_created'* notification via WebSocket.",
+    description="Creates a task and stores it in the database. \n\n"
+    "- **Background Tasks**: sending an email after **A**-level task creation.  \n\n"
+    "- **Real-time**: sends a *'task_created'* notification via WebSocket. \n\n"
+    " **Accept-Lanuage** options: ru (defult), en. \n\n"
+    "**Security**: a valid **Access Token** is required in cookies 🍪.",
     tags=["Tasks"],
 )
 async def create_task(
@@ -61,10 +62,11 @@ async def create_task(
     "/",
     response_model=list[TaskSchema],
     summary="List of all tasks with filtration",
-    description="Retrieves all tasks from the database. A valid **Access Token** is required in cookies 🍪.  \n\n"
+    description="Retrieves all tasks from the database. "
     "Available filters (Qery params):  \n\n"
     "- **level**: Importance level (*A, B, C, D*);  \n\n"
-    "- **completed**: Completion status (*True/False*).",
+    "- **completed**: Completion status (*True/False*). \n\n"
+    "**Security**: a valid **Access Token** is required in cookies 🍪.",
     tags=["Tasks"],
 )
 async def get_tasks(
@@ -84,8 +86,7 @@ async def get_tasks(
 @router.get(
     "/board",
     summary="Tasks for the board",
-    description="Retrieves all **uncompleted** tasks.   \n"
-    "Used by the frontend to display the general kanban/board.",
+    description="Retrieves all **uncompleted** tasks.",
     tags=["Frontend"],
 )
 async def get_tasks_for_board(session: AsyncSession = Depends(get_db_connection)):
@@ -220,6 +221,7 @@ async def complete_task(
     summary="Adding a comment (Admin)",
     description="Allows the administrator to add a remark on the task.  \n\n"
     "**Background Tasks**: sending an email after creating a remark. \n\n"
+    "**Accept-Lanuage** options: ru (defult), en. \n\n"
     "**Real-time**: sends a *'remark_created'* notification via WebSocket.",
     tags=["Tasks"],
 )
