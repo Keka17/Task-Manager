@@ -219,7 +219,8 @@ async def complete_task(
     response_model=TaskSchema,
     summary="Adding a comment (Admin)",
     description="Allows the administrator to add a remark on the task.  \n\n"
-    "**Background Tasks**: sending an email after creating a remark.",
+    "**Background Tasks**: sending an email after creating a remark. \n\n"
+    "**Real-time**: sends a *'remark_created'* notification via WebSocket.",
     tags=["Tasks"],
 )
 async def create_remark(
@@ -234,9 +235,19 @@ async def create_remark(
     Creating a remark for a specific task.
     Only available to users with administrative privileges.
     """
-    return await TaskService.create_remark(
+    task_to_update = await TaskService.create_remark(
         task_id, task_update, accept_language, session, backgroud_tasks
     )
+
+    await manager.broadcast(
+        {
+            "event": "remark_created",
+            "title": task_to_update.title,
+            "remark": task_to_update.remark,
+            "time": task_to_update.updated_at.strftime("%Y-%m-%d %H:%M"),
+        }
+    )
+    return task_to_update
 
 
 @router.delete(

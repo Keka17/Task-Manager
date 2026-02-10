@@ -32,7 +32,7 @@ async def websocket_endpoint(
         print(f"An error occured: {e}")
 
 
-@router.get("/enter", response_class=HTMLResponse)
+@router.get("/enter", response_class=HTMLResponse, tags=["Frontend"])
 async def board_page(
     request: Request,
 ):

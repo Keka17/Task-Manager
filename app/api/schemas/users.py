@@ -1,6 +1,10 @@
-from pydantic import BaseModel, field_validator, EmailStr, ConfigDict
+from datetime import datetime
+from pydantic import BaseModel, field_validator, EmailStr, ConfigDict, PlainSerializer
 import re
 from fastapi_babel import _
+from typing import Annotated
+from zoneinfo import ZoneInfo
+
 from app.core.config import get_settings
 
 settings = get_settings()
@@ -24,6 +28,7 @@ def example_user_out(schema: dict) -> None:
         "email": "dundermifflin@gmail.com",
         "phone": "89777907157",
         "id": 94,
+        "signed_up_at": "2026-02-08 22:57",
     }
 
 
@@ -108,8 +113,20 @@ class UserCreate(UserBase):
     model_config = ConfigDict(json_schema_extra=example_user_in)
 
 
+# Custom datetime object output based on the time zone
+LOCAL_TZ = ZoneInfo(settings.TZ_IANA)
+
+DateTimeHuman = Annotated[
+    datetime,
+    PlainSerializer(
+        lambda dt: dt.astimezone(LOCAL_TZ).strftime("%Y-%m-%d %H:%M"), return_type=str
+    ),
+]
+
+
 class User(UserBase):
     id: int
+    signed_up_at: DateTimeHuman
 
     model_config = ConfigDict(from_attributes=True, json_schema_extra=example_user_out)
 

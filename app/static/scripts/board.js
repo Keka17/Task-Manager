@@ -103,14 +103,17 @@ try {
             refreshBoardData();
         }
 
+        if (data.even == 'remark_created') {
+            console.log('Update detected!');
+            showNotification(`A remark has been added to the task "${data.title}"`);
+            refreshBoardData();
+        }
+
         if (data.event === 'task_deleted') {
             console.log('Update detected!');
             showNotification(`The task "${data.title}" has been deleted`);
             refreshBoardData();
         }
-
-
-
 
         if (data.event === 'user_joined' || data.event === 'user_left') {
             const actionText = data.event === 'user_joined' ? 'joined' : 'left';
